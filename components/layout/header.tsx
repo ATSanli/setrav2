@@ -27,11 +27,11 @@ import { SearchDialog } from '@/components/search-dialog'
 import { cn } from '@/lib/utils'
 
 const categories = [
-  { name: 'Ferace', slug: 'ferace' },
+  /* { name: 'Ferace', slug: 'ferace' }, */
   { name: 'Elbise', slug: 'elbise' },
   { name: 'Takım', slug: 'takim' },
   { name: 'Şal & Eşarp', slug: 'sal-esarp' },
-  { name: 'Aksesuar', slug: 'aksesuar' },
+   /* { name: 'Aksesuar', slug: 'aksesuar' }, */
 ]
 
 export function Header() {
