@@ -3,7 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  // Switched to PostgreSQL for production (Neon). The DATABASE_URL in .env
+  // points to the production Postgres-compatible database.
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
