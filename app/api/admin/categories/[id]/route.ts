@@ -49,6 +49,12 @@ export async function PATCH(request: NextRequest, { params }: { params: any }) {
     const body = await request.json()
     const { name, slug, description, image, parentId, isActive, sortOrder } = body
 
+    // Normalize image field: accept string or Cloudinary-like object
+    const imageValue =
+      typeof image === 'string'
+        ? image
+        : image?.url ?? image?.secure_url ?? image?.path ?? null
+
     // Ensure category exists
     const existing = await prisma.category.findUnique({ where: { id } })
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -77,7 +83,7 @@ export async function PATCH(request: NextRequest, { params }: { params: any }) {
         name: name ?? existing.name,
         slug: finalSlug,
         description: description ?? existing.description,
-        image: image ?? existing.image,
+        image: imageValue ?? existing.image,
         parentId: parentId ?? null,
         isActive: typeof isActive === 'boolean' ? isActive : existing.isActive,
         sortOrder: typeof sortOrder !== 'undefined' ? Number(sortOrder) : existing.sortOrder,

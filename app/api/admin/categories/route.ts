@@ -46,6 +46,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, slug, description, image, parentId, isActive, sortOrder } = body
 
+    // Normalize image field: accept string or Cloudinary-like object
+    const imageValue =
+      typeof image === 'string'
+        ? image
+        : image?.url ?? image?.secure_url ?? image?.path ?? null
+
     // Generate slug if not provided
     let finalSlug = slug
     if (!finalSlug) {
@@ -66,7 +72,7 @@ export async function POST(request: NextRequest) {
         name,
         slug: finalSlug,
         description,
-        image,
+        image: imageValue,
         parentId,
         isActive: isActive ?? true,
         sortOrder: sortOrder ?? 0
