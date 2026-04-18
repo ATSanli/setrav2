@@ -75,3 +75,9 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: err?.message || 'Delete failed' }, { status: 500 })
   }
 }
+export async function GET() {
+  return Response.json({
+    cloud: process.env.CLOUDINARY_CLOUD_NAME,
+    key: process.env.CLOUDINARY_API_KEY,
+  })
+}
