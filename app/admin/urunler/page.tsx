@@ -119,6 +119,9 @@ async function ProductsTable() {
                         {product.isFeatured && (
                           <Badge className="bg-accent text-accent-foreground">Featured</Badge>
                         )}
+                        {product.isBestSeller && (
+                          <Badge className="bg-yellow-100 text-yellow-800">Best Seller</Badge>
+                        )}
                         {product.isNew && (
                           <Badge className="bg-green-100 text-green-800">New</Badge>
                         )}

@@ -82,6 +82,7 @@ export default function HomePage() {
   const t = useT()
   const { data: productsData } = useSWR('/api/products?featured=true&limit=8', fetcher)
   const { data: newProductsData } = useSWR('/api/products?new=true&limit=4', fetcher)
+  const { data: bestsellerData } = useSWR('/api/products?bestseller=true&limit=8', fetcher)
   
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({
@@ -95,6 +96,7 @@ export default function HomePage() {
 
   const featuredProducts = productsData?.products || []
   const newProducts = newProductsData?.products || []
+  const bestsellerProducts = bestsellerData?.products || []
 
   return (
     <div className="flex flex-col overflow-hidden">
@@ -277,8 +279,8 @@ export default function HomePage() {
               viewport={{ once: true, margin: '-50px' }}
               variants={staggerContainer}
             >
-              {featuredProducts.length > 0 ? (
-                featuredProducts.map((product: any) => (
+              {(bestsellerProducts.length > 0 ? bestsellerProducts : (featuredProducts.length > 0 ? featuredProducts : newProducts)).slice(0,8).length > 0 ? (
+                (bestsellerProducts.length > 0 ? bestsellerProducts : (featuredProducts.length > 0 ? featuredProducts : newProducts)).slice(0,8).map((product: any) => (
                   <motion.div 
                     key={product.id} 
                     variants={scaleIn}

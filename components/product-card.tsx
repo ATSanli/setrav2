@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Heart } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn, formatPrice } from '@/lib/utils'
 
@@ -43,6 +44,24 @@ export function ProductCard({
     e.stopPropagation()
     setIsWishlisted(!isWishlisted)
     // TODO: Implement wishlist API call
+  }
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const variantId = (colors && (colors as any)[0] && (colors as any)[0].id) || null
+    if (!variantId) {
+      toast.error('Please select a variant on product page')
+      return
+    }
+    try {
+      const res = await fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: id, variantId, quantity: 1 }) })
+      const js = await res.json()
+      if (!res.ok) throw new Error(js?.error || 'Failed')
+      toast.success('Added to cart')
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to add to cart')
+    }
   }
 
   return (
@@ -92,10 +111,10 @@ export function ProductCard({
           </Button>
 
           {/* Quick add overlay */}
-          <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
             <Button 
               variant="secondary" 
-              className="w-full bg-background/95 hover:bg-background"
+              className="flex-1 bg-background/95 hover:bg-background"
               onClick={(e) => {
                 e.preventDefault()
                 // Navigate to product page for size selection
@@ -104,6 +123,7 @@ export function ProductCard({
             >
               Hızlı Bakış
             </Button>
+            <Button variant="ghost" className="bg-background/95 hover:bg-background" onClick={handleAddToCart}>Sepete Ekle</Button>
           </div>
         </div>
 

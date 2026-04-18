@@ -26,6 +26,7 @@ export default function ProductForm({ initialData, productId, categories }: { in
     isActive: initialData?.isActive ?? true,
     isFeatured: initialData?.isFeatured ?? false,
     isNew: initialData?.isNew ?? true,
+    isBestSeller: initialData?.isBestSeller ?? false,
   }))
 
   const [variants, setVariants] = useState<any[]>(initialData?.variants || [])
@@ -200,6 +201,21 @@ export default function ProductForm({ initialData, productId, categories }: { in
               <div className="flex items-center gap-4">
                 <Switch checked={formData.isActive} onCheckedChange={(val: boolean) => setFormData(prev => ({ ...prev, isActive: val }))} />
                 <span className="text-sm">Active</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center gap-4">
+                <Switch checked={formData.isBestSeller} onCheckedChange={async (val: boolean) => {
+                  setFormData(prev => ({ ...prev, isBestSeller: val }))
+                  if (!productId) return
+                  try {
+                    await fetch(`/api/admin/products/${productId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isBestSeller: val }) })
+                    toast.success(val ? 'Marked as Best Seller' : 'Removed from Best Sellers')
+                  } catch (err) {
+                    toast.error('Failed to update Best Seller')
+                  }
+                }} />
+                <span className="text-sm">Mark as Best Seller</span>
               </div>
             </div>
           </CardContent>

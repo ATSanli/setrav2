@@ -46,65 +46,50 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
 
     const body = await request.json()
 
-    const {
-      name,
-      slug,
-      description,
-      price,
-      comparePrice,
-      sku,
-      categoryId,
-      isActive,
-      isFeatured,
-      isNew,
-      variants,
-      images
-    } = body
+    // Build update data only from provided fields to allow partial updates (e.g., toggling isBestSeller)
+    const upData: any = {}
+    const allowedFields = ['name','slug','description','price','comparePrice','sku','categoryId','isActive','isFeatured','isNew','isBestSeller']
+    for (const f of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(body, f)) upData[f] = body[f]
+    }
 
     const updated = await prisma.product.update({
       where: { id },
-      data: {
-        name,
-        slug,
-        description,
-        price,
-        comparePrice,
-        sku,
-        categoryId,
-        isActive,
-        isFeatured,
-        isNew
-      }
+      data: upData
     })
 
-    // 🔥 VARIANTS RESET
-    await prisma.productVariant.deleteMany({ where: { productId: id } })
-
-    if (Array.isArray(variants) && variants.length > 0) {
-      await prisma.productVariant.createMany({
-        data: variants.map((v: any) => ({
-          productId: id,
-          size: v.size,
-          color: v.color,
-          colorHex: v.colorHex,
-          stock: v.stock,
-          sku: v.sku
-        }))
-      })
+    // 🔥 VARIANTS RESET (only if provided)
+    if (Object.prototype.hasOwnProperty.call(body, 'variants')) {
+      await prisma.productVariant.deleteMany({ where: { productId: id } })
+      const variants = body.variants
+      if (Array.isArray(variants) && variants.length > 0) {
+        await prisma.productVariant.createMany({
+          data: variants.map((v: any) => ({
+            productId: id,
+            size: v.size,
+            color: v.color,
+            colorHex: v.colorHex,
+            stock: v.stock,
+            sku: v.sku
+          }))
+        })
+      }
     }
 
-    // 🔥 IMAGES RESET
-    await prisma.productImage.deleteMany({ where: { productId: id } })
-
-    if (Array.isArray(images) && images.length > 0) {
-      await prisma.productImage.createMany({
-        data: images.map((url: string, i: number) => ({
-          productId: id,
-          url,
-          alt: name || '',
-          sortOrder: i
-        }))
-      })
+    // 🔥 IMAGES RESET (only if provided)
+    if (Object.prototype.hasOwnProperty.call(body, 'images')) {
+      await prisma.productImage.deleteMany({ where: { productId: id } })
+      const images = body.images
+      if (Array.isArray(images) && images.length > 0) {
+        await prisma.productImage.createMany({
+          data: images.map((url: string, i: number) => ({
+            productId: id,
+            url,
+            alt: body.name || '',
+            sortOrder: i
+          }))
+        })
+      }
     }
 
     const resp = await prisma.product.findUnique({

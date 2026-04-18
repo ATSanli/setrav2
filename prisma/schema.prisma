@@ -106,6 +106,7 @@ model Product {
   comparePrice  Float?
   sku           String    @unique
   categoryId    String
+  isBestSeller  Boolean   @default(false)
   isFeatured    Boolean   @default(false)
   isNew         Boolean   @default(false)
   isActive      Boolean   @default(true)

@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const featured = searchParams.get('featured') === 'true'
     const isNew = searchParams.get('new') === 'true'
+    const bestseller = searchParams.get('bestseller') === 'true'
     const category = searchParams.get('category')
     const limit = parseInt(searchParams.get('limit') || '12')
     const page = parseInt(searchParams.get('page') || '1')
@@ -25,6 +26,10 @@ export async function GET(request: NextRequest) {
 
     if (isNew) {
       where.isNew = true
+    }
+
+    if (bestseller) {
+      where.isBestSeller = true
     }
 
     if (category) {
