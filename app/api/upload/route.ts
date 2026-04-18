@@ -71,3 +71,40 @@ export async function POST(request: Request) {
     )
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json().catch(() => ({}))
+    const { path, public_id, file } = body as any
+
+    if (!public_id && !path && !file) {
+      return NextResponse.json({ error: 'Missing path or public_id' }, { status: 400 })
+    }
+
+    let id = public_id || file || ''
+
+    if (!id && path && typeof path === 'string') {
+      // Try to derive public_id from Cloudinary secure_url
+      // Example: https://res.cloudinary.com/<cloud>/image/upload/v168/.../setra/products/abcd.jpg
+      const parts = path.split('/upload/')
+      if (parts.length > 1) {
+        id = parts[1]
+        // remove version segment like v12345/
+        id = id.replace(/^v\d+\//, '')
+        // remove file extension
+        id = id.replace(/\.[a-zA-Z0-9]+$/, '')
+      }
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Unable to determine public_id' }, { status: 400 })
+    }
+
+    await cloudinary.uploader.destroy(id, { resource_type: 'image' })
+
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    console.error('DELETE /api/upload error:', err)
+    return NextResponse.json({ error: err?.message || 'Delete failed' }, { status: 500 })
+  }
+}

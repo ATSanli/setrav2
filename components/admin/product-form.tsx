@@ -81,7 +81,8 @@ export default function ProductForm({ initialData, productId, categories }: { in
         const up = await fetch('/api/upload', { method: 'POST', body: fd })
         const upj = await up.json()
         if (!up.ok) throw new Error(upj?.error || 'Upload failed')
-        uploadedPaths = upj.paths || []
+        // normalize upload response: accept array of strings or objects { url, public_id }
+        uploadedPaths = (upj.paths || []).map((p: any) => (typeof p === 'string' ? p : p.url))
       }
 
       const payload = {
