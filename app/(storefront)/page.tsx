@@ -8,6 +8,7 @@ import { ArrowRight, Truck, Shield, RotateCcw, Instagram, Play } from 'lucide-re
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ProductCard } from '@/components/product-card'
+import { useT } from '@/components/providers/language-provider'
 import useSWR from 'swr'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
@@ -78,6 +79,7 @@ function AnimatedSection({ children, className = '' }: { children: React.ReactNo
 }
 
 export default function HomePage() {
+  const t = useT()
   const { data: productsData } = useSWR('/api/products?featured=true&limit=8', fetcher)
   const { data: newProductsData } = useSWR('/api/products?new=true&limit=4', fetcher)
   
@@ -128,7 +130,7 @@ export default function HomePage() {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="inline-block text-white/80 text-sm uppercase tracking-[0.4em] mb-6"
             >
-              2026 Collection
+              {t('hero_tagline')}
             </motion.span>
             
             <motion.h1 
@@ -137,9 +139,9 @@ export default function HomePage() {
               transition={{ delay: 0.7, duration: 1, ease: [0.22, 1, 0.36, 1] }}
               className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-8 leading-[0.95] tracking-tight"
             >
-              New Season.
+              {t('hero_title_1')}
               <br />
-              <span className="italic">New Elegance.</span>
+              <span className="italic">{t('hero_title_2')}</span>
             </motion.h1>
             
             <motion.p 
@@ -148,7 +150,7 @@ export default function HomePage() {
               transition={{ delay: 0.9, duration: 0.8 }}
               className="text-white/90 text-lg md:text-xl mb-12 max-w-xl mx-auto font-light tracking-wide"
             >
-              {"Discover SETRA's premium modest collection"}
+              {t('hero_subtitle')}
             </motion.p>
             
             <motion.div
@@ -162,7 +164,7 @@ export default function HomePage() {
                 className="bg-white text-black hover:bg-white/90 rounded-none px-12 py-6 text-sm uppercase tracking-[0.2em] font-medium transition-all duration-500 hover:tracking-[0.3em]"
               >
                 <Link href="/urunler">
-                  Shop Now
+                  {t('hero_cta')}
                   <ArrowRight className="ml-3 h-4 w-4" />
                 </Link>
               </Button>
@@ -197,10 +199,10 @@ export default function HomePage() {
           <AnimatedSection>
             <div className="text-center mb-16">
               <span className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-4 block">
-                Collections
+                {t('collections')}
               </span>
               <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight">
-                Shop by Category
+                {t('shop_by_category')}
               </h2>
             </div>
           </AnimatedSection>
@@ -231,7 +233,7 @@ export default function HomePage() {
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-sm p-4">
                       <h3 className="font-serif text-2xl text-white mb-2">{category.name}</h3>
                       <span className="text-white/80 text-sm uppercase tracking-widest flex items-center gap-2">
-                        Keşfet <ArrowRight className="h-4 w-4" />
+                        {t('explore')} <ArrowRight className="h-4 w-4" />
                       </span>
                     </div>
                   </div>
@@ -254,9 +256,9 @@ export default function HomePage() {
             <div className="flex items-end justify-between mb-12">
               <div>
                 <span className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-4 block">
-                  Most Loved
+                  {t('most_loved')}
                 </span>
-                <h2 className="font-serif text-4xl md:text-5xl tracking-tight">Bestsellers</h2>
+                <h2 className="font-serif text-4xl md:text-5xl tracking-tight">{t('bestsellers')}</h2>
               </div>
               <Button variant="ghost" asChild className="hidden md:flex group">
                 <Link href="/urunler?sort=bestseller" className="text-sm uppercase tracking-widest">

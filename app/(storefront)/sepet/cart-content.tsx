@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice } from '@/lib/utils'
+import { useT } from '@/components/providers/language-provider'
 
 const FREE_SHIPPING_THRESHOLD = 500
 
@@ -17,6 +18,7 @@ export function CartContent() {
   const router = useRouter()
   const { items, subtotal, isLoading, updateQuantity, removeItem, clearCart } = useCart()
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
+  const t = useT()
 
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
     setUpdatingItems(prev => new Set(prev).add(itemId))
@@ -35,7 +37,7 @@ export function CartContent() {
   const handleRemoveItem = async (itemId: string) => {
     const result = await removeItem(itemId)
     if (result.success) {
-      toast.success('Ürün sepetten kaldırıldı')
+      toast.success(t('cart_empty_text'))
     } else {
       toast.error(result.error)
     }
@@ -57,13 +59,11 @@ export function CartContent() {
     return (
       <div className="text-center py-16">
         <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-        <h2 className="text-xl font-medium mb-2">Sepetiniz boş</h2>
-        <p className="text-muted-foreground mb-6">
-          Alışverişe başlamak için ürünlerimize göz atın.
-        </p>
+        <h2 className="text-xl font-medium mb-2">{t('cart_empty_title')}</h2>
+        <p className="text-muted-foreground mb-6">{t('cart_empty_text')}</p>
         <Button asChild>
           <Link href="/urunler">
-            Alışverişe Başla
+            {t('start_shopping')}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
@@ -177,17 +177,17 @@ export function CartContent() {
       {/* Order summary */}
       <div className="lg:col-span-1">
         <div className="bg-secondary/30 p-6 sticky top-24">
-          <h2 className="font-serif text-xl mb-6">Sipariş Özeti</h2>
+          <h2 className="font-serif text-xl mb-6">{t('order_summary')}</h2>
 
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Ara Toplam</span>
+              <span className="text-muted-foreground">{t('subtotal')}</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Kargo</span>
+              <span className="text-muted-foreground">{t('shipping')}</span>
               <span className={shippingCost === 0 ? 'text-accent' : ''}>
-                {shippingCost === 0 ? 'Ücretsiz' : formatPrice(shippingCost)}
+                {shippingCost === 0 ? t('free') : formatPrice(shippingCost)}
               </span>
             </div>
           </div>
@@ -195,35 +195,33 @@ export function CartContent() {
           <Separator className="my-4" />
 
           <div className="flex justify-between font-medium text-lg mb-6">
-            <span>Toplam</span>
+            <span>{t('total')}</span>
             <span>{formatPrice(total)}</span>
           </div>
 
           <Button className="w-full h-12" size="lg" asChild>
             <Link href="/odeme">
-              Ödemeye Geç
+              {t('checkout')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
 
-          <p className="text-xs text-muted-foreground text-center mt-4">
-            Siparişiniz güvenli ödeme ile işlenir
-          </p>
+          <p className="text-xs text-muted-foreground text-center mt-4">{t('secure_order')}</p>
 
           <Separator className="my-6" />
 
           <div className="space-y-2 text-xs text-muted-foreground">
             <p className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full bg-current" />
-              14 gün ücretsiz iade
+              {t('free_returns')}
             </p>
             <p className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full bg-current" />
-              Güvenli SSL ödeme
+              {t('secure_ssl')}
             </p>
             <p className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full bg-current" />
-              Hızlı teslimat
+              {t('fast_delivery')}
             </p>
           </div>
         </div>

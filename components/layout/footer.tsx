@@ -1,5 +1,8 @@
+"use client"
+
 import Link from 'next/link'
 import { Instagram, Facebook, Twitter } from 'lucide-react'
+import { useT } from '@/components/providers/language-provider'
 
 const footerLinks = {
   shop: [
@@ -31,27 +34,27 @@ const footerLinks = {
 }
 
 export function Footer() {
+  const t = useT()
+
   return (
     <footer className="bg-primary text-primary-foreground">
       {/* Newsletter */}
       <div className="border-b border-primary-foreground/10">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-xl mx-auto text-center">
-            <h3 className="font-serif text-2xl mb-3">Bültenimize Katılın</h3>
-            <p className="text-primary-foreground/70 mb-6">
-              Yeni koleksiyonlar ve özel fırsatlardan haberdar olun
-            </p>
+            <h3 className="font-serif text-2xl mb-3">{t('newsletter_title')}</h3>
+            <p className="text-primary-foreground/70 mb-6">{t('newsletter_sub')}</p>
             <form className="flex gap-2">
               <input
                 type="email"
-                placeholder="E-posta adresiniz"
+                placeholder={t('email_placeholder')}
                 className="flex-1 px-4 py-3 bg-transparent border border-primary-foreground/30 rounded-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground"
               />
               <button
                 type="submit"
                 className="px-6 py-3 bg-primary-foreground text-primary font-medium rounded-sm hover:bg-primary-foreground/90 transition-colors"
               >
-                Abone Ol
+                {t('subscribe')}
               </button>
             </form>
           </div>
@@ -63,7 +66,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
           <div>
             <h4 className="font-medium mb-4 text-sm uppercase tracking-wider">
-              Alışveriş
+              {t('footer_shop')}
             </h4>
             <ul className="space-y-3">
               {footerLinks.shop.map((link) => (
@@ -81,7 +84,7 @@ export function Footer() {
 
           <div>
             <h4 className="font-medium mb-4 text-sm uppercase tracking-wider">
-              Yardım
+              {t('footer_help')}
             </h4>
             <ul className="space-y-3">
               {footerLinks.help.map((link) => (
@@ -99,7 +102,7 @@ export function Footer() {
 
           <div>
             <h4 className="font-medium mb-4 text-sm uppercase tracking-wider">
-              Kurumsal
+              {t('footer_about')}
             </h4>
             <ul className="space-y-3">
               {footerLinks.about.map((link) => (
@@ -117,7 +120,7 @@ export function Footer() {
 
           <div>
             <h4 className="font-medium mb-4 text-sm uppercase tracking-wider">
-              Yasal
+              {t('footer_legal')}
             </h4>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
@@ -174,7 +177,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-primary-foreground/50 text-sm">
-              &copy; {new Date().getFullYear()} SETRA. Tüm hakları saklıdır.
+              &copy; {new Date().getFullYear()} SETRA. {t('all_rights')}
             </p>
           </div>
         </div>

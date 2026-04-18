@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import './globals.css'
 import { SessionProvider } from '@/components/providers/session-provider'
+import { LanguageProvider } from '@/components/providers/language-provider'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -50,7 +51,9 @@ export default function RootLayout({
     <html lang="tr" className={`${inter.variable} ${playfair.variable} bg-background`}>
       <body className="font-sans antialiased min-h-screen">
         <SessionProvider>
-          {children}
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
         </SessionProvider>
         <Toaster position="top-center" richColors />
         {process.env.NODE_ENV === 'production' && <Analytics />}

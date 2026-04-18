@@ -25,6 +25,7 @@ import {
 import { useCart } from '@/hooks/use-cart'
 import { SearchDialog } from '@/components/search-dialog'
 import { cn } from '@/lib/utils'
+import { useT, useLanguage } from '@/components/providers/language-provider'
 
 const categories = [
   /* { name: 'Ferace', slug: 'ferace' }, */
@@ -48,6 +49,9 @@ export function Header() {
 
   // Check if we're on homepage for transparent header
   const isHomepage = pathname === '/'
+
+  const t = useT()
+  const { language, setLanguage } = useLanguage()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -106,7 +110,7 @@ export function Header() {
               transition={{ duration: 0.3 }}
               className="bg-primary text-primary-foreground text-center py-2 text-xs uppercase tracking-widest overflow-hidden"
             >
-              <p>Complimentary Shipping on Orders Over 500 TL</p>
+              <p>{t('shipping')}</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -119,11 +123,11 @@ export function Header() {
               <SheetTrigger asChild className="lg:hidden">
                 <Button variant="ghost" size="icon" className={textColor}>
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Menüyü aç</span>
+                  <span className="sr-only">{t('open_menu')}</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-full max-w-md bg-background p-0">
-                <SheetTitle className="sr-only">Navigasyon Menüsü</SheetTitle>
+                <SheetTitle className="sr-only">{t('navigation_menu')}</SheetTitle>
                 <div className="flex flex-col h-full">
                   {/* Mobile menu header */}
                   <div className="flex items-center justify-between p-6 border-b">
@@ -165,7 +169,7 @@ export function Header() {
                           className="block py-4 text-2xl font-serif text-accent border-b border-border/50"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          New Arrivals
+                          {t('new_arrivals')}
                         </Link>
                       </motion.div>
                     </div>
@@ -183,7 +187,7 @@ export function Header() {
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           <User className="h-5 w-5" />
-                          My Account
+                          {t('my_account')}
                         </Link>
                       ) : (
                         <Link 
@@ -192,7 +196,7 @@ export function Header() {
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           <User className="h-5 w-5" />
-                          Sign In
+                          {t('sign_in')}
                         </Link>
                       )}
                     </div>
@@ -203,7 +207,7 @@ export function Header() {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <Heart className="h-5 w-5" />
-                        Wishlist
+                        {t('wishlist')}
                       </Link>
                     </div>
                   </div>
@@ -244,13 +248,36 @@ export function Header() {
                   isHomepage && !scrolled ? 'text-accent' : 'text-accent'
                 )}
               >
-                New
+                {t('new')}
                 <span className="absolute -bottom-1 left-0 w-0 h-px bg-accent transition-all duration-300 group-hover:w-full" />
               </Link>
             </nav>
 
             {/* Actions */}
             <div className="flex items-center gap-1 lg:gap-3">
+              <div className="hidden sm:flex items-center pr-2">
+                <button
+                  onClick={() => setLanguage('tr')}
+                  aria-pressed={language === 'tr'}
+                  className={cn(
+                    'text-sm px-2 py-1 rounded transition-colors',
+                    language === 'tr' ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
+                  )}
+                >
+                  TR
+                </button>
+                <span className="text-xs text-muted-foreground px-2">|</span>
+                <button
+                  onClick={() => setLanguage('en')}
+                  aria-pressed={language === 'en'}
+                  className={cn(
+                    'text-sm px-2 py-1 rounded transition-colors',
+                    language === 'en' ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
+                  )}
+                >
+                  EN
+                </button>
+              </div>
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -258,7 +285,7 @@ export function Header() {
                 className={cn('hover:bg-transparent hover:opacity-70', textColor)}
               >
                 <Search className="h-5 w-5" />
-                <span className="sr-only">Ara</span>
+                <span className="sr-only">{t('search')}</span>
               </Button>
 
               {status === 'loading' ? (
@@ -277,25 +304,25 @@ export function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem asChild>
-                      <Link href="/hesabim">My Account</Link>
+                      <Link href="/hesabim">{t('my_account')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/hesabim/siparislerim">Orders</Link>
+                      <Link href="/hesabim/siparislerim">{t('orders')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/hesabim/favorilerim">Wishlist</Link>
+                      <Link href="/hesabim/favorilerim">{t('wishlist')}</Link>
                     </DropdownMenuItem>
                       {(session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN') && (
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link href="/admin">Admin Panel</Link>
+                          <Link href="/admin">{t('admin_panel')}</Link>
                         </DropdownMenuItem>
                       </>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/api/auth/signout">Sign Out</Link>
+                      <Link href="/api/auth/signout">{t('sign_out')}</Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -306,10 +333,10 @@ export function Header() {
                   asChild 
                   className={cn('hidden sm:flex hover:bg-transparent hover:opacity-70', textColor)}
                 >
-                  <Link href="/giris">
-                    <User className="h-5 w-5" />
-                    <span className="sr-only">Giriş Yap</span>
-                  </Link>
+                    <Link href="/giris">
+                        <User className="h-5 w-5" />
+                        <span className="sr-only">{t('sign_in')}</span>
+                      </Link>
                 </Button>
               )}
 
@@ -321,7 +348,7 @@ export function Header() {
               >
                 <Link href="/favoriler">
                   <Heart className="h-5 w-5" />
-                  <span className="sr-only">Favoriler</span>
+                  <span className="sr-only">{t('wishlist')}</span>
                 </Link>
               </Button>
 
@@ -345,7 +372,7 @@ export function Header() {
                       </motion.span>
                     )}
                   </AnimatePresence>
-                  <span className="sr-only">Sepet</span>
+                  <span className="sr-only">{t('cart_sr')}</span>
                 </Link>
               </Button>
             </div>

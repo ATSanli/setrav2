@@ -12,6 +12,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useT } from '@/components/providers/language-provider'
 
 const loginSchema = z.object({
   email: z.string().email('Geçerli bir e-posta adresi giriniz'),
@@ -35,6 +36,7 @@ export default function LoginPage() {
   }, [])
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const t = useT()
 
   const {
     register,
@@ -76,19 +78,19 @@ export default function LoginPage() {
             <Link href="/" className="font-serif text-3xl tracking-[0.2em]">
               SETRA
             </Link>
-            <h1 className="mt-6 font-serif text-2xl">Giriş Yap</h1>
+            <h1 className="mt-6 font-serif text-2xl">{t('login_title')}</h1>
             <p className="text-muted-foreground mt-2">
-              Hesabınıza giriş yapın
+              {t('login_subtitle')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <Label htmlFor="email">E-posta</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="ornek@email.com"
+                placeholder={t('email_placeholder')}
                 {...register('email')}
               />
               {errors.email && (
@@ -98,12 +100,12 @@ export default function LoginPage() {
 
             <div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Şifre</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 <Link
                   href="/sifremi-unuttum"
                   className="text-sm text-muted-foreground hover:text-foreground"
                 >
-                  Şifremi Unuttum
+                  {t('forgot_password')}
                 </Link>
               </div>
               <div className="relative">
@@ -131,17 +133,17 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+              {isLoading ? t('login_loading') : t('login_title')}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Hesabınız yok mu?{' '}
+            {t('no_account')}{' '}
             <Link
               href="/kayit"
               className="text-foreground font-medium hover:underline"
             >
-              Kayıt Olun
+              {t('register')}
             </Link>
           </p>
         </div>

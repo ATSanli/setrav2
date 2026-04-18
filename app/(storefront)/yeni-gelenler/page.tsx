@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
+import NewArrivalsHeader from '@/components/new-arrivals/header'
+import NewArrivalsEmpty from '@/components/new-arrivals/empty'
 import { prisma } from '@/lib/prisma'
 import { ProductCard } from '@/components/product-card'
 
@@ -54,29 +56,7 @@ export default async function NewArrivalsPage({ searchParams }: Props) {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-accent/10 py-12">
-        <div className="container mx-auto px-4">
-          <nav className="mb-4">
-            <ol className="flex items-center gap-2 text-sm">
-              <li>
-                <Link href="/" className="text-muted-foreground hover:text-foreground">
-                  Ana Sayfa
-                </Link>
-              </li>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              <li className="font-medium">Yeni Gelenler</li>
-            </ol>
-          </nav>
-          <span className="text-sm uppercase tracking-widest text-accent font-medium mb-2 block">
-            Yeni Koleksiyon
-          </span>
-          <h1 className="font-serif text-3xl lg:text-4xl">Yeni Gelenler</h1>
-          <p className="text-muted-foreground mt-2">
-            En yeni ürünlerimizi keşfedin - {total} yeni ürün
-          </p>
-        </div>
-      </div>
+      <NewArrivalsHeader total={total} />
 
       <div className="container mx-auto px-4 py-12">
         {/* Products */}
@@ -98,9 +78,7 @@ export default async function NewArrivalsPage({ searchParams }: Props) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground">Henüz yeni ürün eklenmedi.</p>
-          </div>
+          <NewArrivalsEmpty />
         )}
 
         {/* Pagination */}

@@ -9,7 +9,7 @@ interface Props {
 }
 
 async function getCategory(slug: string) {
-  const category = await prisma.category.findUnique({
+  const category = await prisma.category.findFirst({
     where: { slug, isActive: true },
     include: {
       children: {
