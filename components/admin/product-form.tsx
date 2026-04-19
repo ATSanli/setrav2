@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, X } from 'lucide-react'
+import { ArrowLeft, X, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,6 +30,22 @@ export default function ProductForm({ initialData, productId, categories }: { in
   }))
 
   const [variants, setVariants] = useState<any[]>(initialData?.variants || [])
+  const [sizes, setSizes] = useState<string[]>(() => {
+    if (initialData?.variants && initialData.variants.length > 0) {
+      return Array.from(new Set(initialData.variants.map((v: any) => v.size)))
+    }
+    // default sizes for new products
+    return ['36', '38', '40', '42']
+  })
+  const [colors, setColors] = useState<string[]>(() => {
+    if (initialData?.variants && initialData.variants.length > 0) {
+      return Array.from(new Set(initialData.variants.map((v: any) => v.color)))
+    }
+    return []
+  })
+  const [sizeInput, setSizeInput] = useState('')
+  const [colorInput, setColorInput] = useState('')
+  const [applyStock, setApplyStock] = useState<number | ''>('')
   const [images, setImages] = useState<string[]>(initialData?.images?.map((i: any) => i.url) || [])
   const [newFiles, setNewFiles] = useState<Array<{ file: File; preview: string }>>([])
 
@@ -40,6 +56,68 @@ export default function ProductForm({ initialData, productId, categories }: { in
     const imgs = list.filter(f => f.type.startsWith('image/'))
     const mapped = imgs.map(f => ({ file: f, preview: URL.createObjectURL(f) }))
     setNewFiles(prev => [...prev, ...mapped])
+  }
+
+  // keep variants in sync with sizes/colors: auto-generate combinations but preserve existing stocks
+  useEffect(() => {
+    const existingMap = new Map(variants.map(v => [`${v.size}::${v.color}`, v]))
+    const combos: any[] = []
+    for (const s of sizes) {
+      for (const c of colors.length ? colors : ['']) {
+        const key = `${s}::${c}`
+        const existing = existingMap.get(key)
+        combos.push({
+          size: s,
+          color: c,
+          colorHex: existing?.colorHex || '',
+          stock: typeof existing?.stock === 'number' ? existing.stock : 0,
+          sku: existing?.sku || ''
+        })
+      }
+    }
+    setVariants(combos)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sizes, colors])
+
+  const addSize = () => {
+    const v = sizeInput.trim()
+    if (!v) return
+    if (!sizes.includes(v)) setSizes(prev => [...prev, v])
+    setSizeInput('')
+  }
+
+  const removeSize = (s: string) => setSizes(prev => prev.filter(x => x !== s))
+
+  const addColor = () => {
+    const v = colorInput.trim()
+    if (!v) return
+    if (!colors.includes(v)) setColors(prev => [...prev, v])
+    setColorInput('')
+  }
+
+  const removeColor = (c: string) => setColors(prev => prev.filter(x => x !== c))
+
+  const updateVariant = (index: number, patch: Partial<any>) => {
+    setVariants(prev => {
+      const next = [...prev]
+      next[index] = { ...next[index], ...patch }
+      return next
+    })
+  }
+
+  const duplicateVariant = (index: number) => {
+    setVariants(prev => {
+      const next = [...prev]
+      const v = { ...next[index], sku: '' }
+      next.splice(index + 1, 0, v)
+      return next
+    })
+  }
+
+  const applyStockToAll = () => {
+    if (applyStock === '') return
+    const s = Number(applyStock)
+    setVariants(prev => prev.map(v => ({ ...v, stock: s })))
   }
 
   const onDrop = (e: React.DragEvent) => {
@@ -71,6 +149,12 @@ export default function ProductForm({ initialData, productId, categories }: { in
     if (!formData.name || !formData.price || !formData.categoryId) {
       toast.error('Please fill required fields')
       return
+    }
+    // validate variants
+    for (const v of variants) {
+      if (!v.size) { toast.error('All variants must have a size'); return }
+      if (!v.color) { toast.error('All variants must have a color'); return }
+      if (typeof v.stock !== 'number' || v.stock < 0) { toast.error('Stock must be a number >= 0'); return }
     }
     setLoading(true)
     try {
@@ -195,6 +279,99 @@ export default function ProductForm({ initialData, productId, categories }: { in
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Variants */}
+            <div className="space-y-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Variants</CardTitle>
+                  <CardDescription>Manage sizes, colors and stock per variant</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <div>
+                      <Label>Sizes</Label>
+                      <div className="flex gap-2 mt-2 items-center">
+                        <Input placeholder="Add size (e.g. 36)" value={sizeInput} onChange={e => setSizeInput(e.target.value)} />
+                        <Button type="button" onClick={addSize}>Add</Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {sizes.map(s => (
+                          <div key={s} className="px-2 py-1 border rounded flex items-center gap-2">
+                            <span>{s}</span>
+                            <button type="button" onClick={() => removeSize(s)} className="text-red-500"><X className="h-3 w-3" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Colors</Label>
+                      <div className="flex gap-2 mt-2 items-center">
+                        <Input placeholder="Add color (e.g. Black)" value={colorInput} onChange={e => setColorInput(e.target.value)} />
+                        <Button type="button" onClick={addColor}>Add</Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {colors.map(c => (
+                          <div key={c} className="px-2 py-1 border rounded flex items-center gap-2">
+                            <span>{c}</span>
+                            <button type="button" onClick={() => removeColor(c)} className="text-red-500"><X className="h-3 w-3" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Bulk</Label>
+                      <div className="flex gap-2 mt-2 items-center">
+                        <Input type="number" placeholder="Stock" value={applyStock === '' ? '' : String(applyStock)} onChange={e => setApplyStock(e.target.value === '' ? '' : Number(e.target.value))} />
+                        <Button type="button" onClick={applyStockToAll}>Apply stock to all</Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Variants</Label>
+                    <div className="overflow-x-auto border rounded mt-2">
+                      <table className="w-full table-fixed">
+                        <thead>
+                          <tr className="text-left">
+                            <th className="px-2 py-2">Size</th>
+                            <th className="px-2 py-2">Color</th>
+                            <th className="px-2 py-2">Stock</th>
+                            <th className="px-2 py-2">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {variants.map((v, idx) => (
+                            <tr key={`${v.size}-${v.color}-${idx}`} className="border-t">
+                              <td className="px-2 py-2">
+                                <select value={v.size} onChange={e => updateVariant(idx, { size: e.target.value })} className="w-full rounded border px-2 py-1">
+                                  {sizes.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                              </td>
+                              <td className="px-2 py-2">
+                                <input value={v.color} onChange={e => updateVariant(idx, { color: e.target.value })} className="w-full rounded border px-2 py-1" list="colors-list" />
+                                <datalist id="colors-list">
+                                  {colors.map(c => <option key={c} value={c} />)}
+                                </datalist>
+                              </td>
+                              <td className="px-2 py-2">
+                                <input type="number" min={0} value={v.stock} onChange={e => updateVariant(idx, { stock: Number(e.target.value) })} className="w-24 rounded border px-2 py-1" />
+                              </td>
+                              <td className="px-2 py-2">
+                                <div className="flex gap-2">
+                                  <Button type="button" variant="ghost" onClick={() => duplicateVariant(idx)}><Copy className="h-4 w-4" /></Button>
+                                  <Button type="button" variant="ghost" onClick={() => setVariants(prev => prev.filter((_, i) => i !== idx))}><X className="h-4 w-4 text-red-500" /></Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="flex items-center justify-between">
