@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog'
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice, cn } from '@/lib/utils'
+import { useT } from '@/components/providers/language-provider'
 
 const addressSchema = z.object({
   title: z.string().min(1, 'Adres başlığı gereklidir'),
@@ -65,6 +66,7 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAddressDialog, setShowAddressDialog] = useState(false)
   const [isAddingAddress, setIsAddingAddress] = useState(false)
+  const t = useT()
 
   const {
     register,
@@ -87,16 +89,16 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
         body: JSON.stringify(data)
       })
 
-      if (!res.ok) throw new Error('Failed to add address')
+      if (!res.ok) throw new Error(t('address_add_failed'))
 
       const newAddress = await res.json()
       setAddresses(prev => [...prev, newAddress])
       setSelectedAddressId(newAddress.id)
       setShowAddressDialog(false)
       reset()
-      toast.success('Adres eklendi')
+      toast.success(t('address_added'))
     } catch {
-      toast.error('Adres eklenemedi')
+      toast.error(t('address_add_failed'))
     } finally {
       setIsAddingAddress(false)
     }
@@ -104,12 +106,12 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
 
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) {
-      toast.error('Lütfen teslimat adresi seçiniz')
+      toast.error(t('select_delivery_address'))
       return
     }
 
     if (items.length === 0) {
-      toast.error('Sepetiniz boş')
+      toast.error(t('empty_cart_checkout'))
       return
     }
 
@@ -126,14 +128,14 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.message || 'Order failed')
+        throw new Error(error.message || t('product_add_error'))
       }
 
       const order = await res.json()
       await clearCart()
       router.push(`/siparis-onay/${order.orderNumber}`)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Sipariş oluşturulamadı')
+      toast.error(error instanceof Error ? error.message : t('product_add_error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -142,9 +144,9 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
   if (items.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-muted-foreground">Sepetiniz boş. Ödeme yapabilmek için sepetinize ürün ekleyin.</p>
+        <p className="text-muted-foreground">{t('empty_cart_checkout')}</p>
         <Button className="mt-4" onClick={() => router.push('/urunler')}>
-          Alışverişe Devam Et
+          {t('continue_shopping')}
         </Button>
       </div>
     )
@@ -161,18 +163,18 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Truck className="h-5 w-5 text-primary" />
               </div>
-              <h2 className="font-serif text-xl">Teslimat Adresi</h2>
+              <h2 className="font-serif text-xl">{t('delivery_address')}</h2>
             </div>
             <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Yeni Adres
+                  {t('new_address')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Yeni Adres Ekle</DialogTitle>
+                  <DialogTitle>{t('new_address')}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onAddAddress)} className="space-y-4 mt-4">
                   <div>
@@ -231,7 +233,7 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
                     )}
                   </div>
                   <Button type="submit" className="w-full" disabled={isAddingAddress}>
-                    {isAddingAddress ? 'Ekleniyor...' : 'Adresi Kaydet'}
+                    {isAddingAddress ? t('adding') : t('add_address')}
                   </Button>
                 </form>
               </DialogContent>
@@ -291,31 +293,31 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <CreditCard className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="font-serif text-xl">Ödeme Yöntemi</h2>
+            <h2 className="font-serif text-xl">{t('payment_method')}</h2>
           </div>
 
           <div className="border border-primary bg-primary/5 rounded-sm p-4">
             <div className="flex items-center gap-3">
               <Check className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium">Kapıda Ödeme</p>
+                <p className="font-medium">{t('cod_label')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Siparişinizi teslim alırken nakit veya kredi kartı ile ödeyebilirsiniz
+                  {t('cod_description')}
                 </p>
               </div>
             </div>
           </div>
 
           <p className="text-xs text-muted-foreground mt-4">
-            * Kredi kartı ile online ödeme yakında aktif olacaktır.
+            {t('card_coming_soon')}
           </p>
         </div>
 
         {/* Order Note */}
         <div className="bg-background p-6 rounded-sm">
-          <h2 className="font-serif text-xl mb-4">Sipariş Notu</h2>
+          <h2 className="font-serif text-xl mb-4">{t('order_note')}</h2>
           <Textarea
-            placeholder="Siparişinizle ilgili eklemek istediğiniz notlar (opsiyonel)"
+            placeholder={t('order_note') + ' (opsiyonel)'}
             value={orderNote}
             onChange={(e) => setOrderNote(e.target.value)}
             rows={3}
@@ -326,7 +328,7 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
       {/* Right column - Order Summary */}
       <div className="lg:col-span-1">
         <div className="bg-background p-6 rounded-sm sticky top-24">
-          <h2 className="font-serif text-xl mb-6">Sipariş Özeti</h2>
+          <h2 className="font-serif text-xl mb-6">{t('order_summary')}</h2>
 
           {/* Items */}
           <div className="space-y-4 mb-6">
@@ -359,13 +361,13 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
           {/* Totals */}
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Ara Toplam</span>
+              <span className="text-muted-foreground">{t('subtotal_label')}</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Kargo</span>
+              <span className="text-muted-foreground">{t('shipping_label')}</span>
               <span className={shippingCost === 0 ? 'text-accent' : ''}>
-                {shippingCost === 0 ? 'Ücretsiz' : formatPrice(shippingCost)}
+                {shippingCost === 0 ? t('free') : formatPrice(shippingCost)}
               </span>
             </div>
           </div>
@@ -373,7 +375,7 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
           <Separator className="my-4" />
 
           <div className="flex justify-between font-medium text-lg mb-6">
-            <span>Toplam</span>
+            <span>{t('total_label')}</span>
             <span>{formatPrice(total)}</span>
           </div>
 
@@ -383,7 +385,7 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
             onClick={handlePlaceOrder}
             disabled={isSubmitting || !selectedAddressId}
           >
-            {isSubmitting ? 'İşleniyor...' : 'Siparişi Tamamla'}
+            {isSubmitting ? t('process_order') : t('place_order')}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center mt-4">

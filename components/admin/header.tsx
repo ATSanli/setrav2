@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AdminSidebar } from './sidebar'
+import { translations } from '@/translations'
 
 interface AdminHeaderProps {
   user: {
@@ -31,14 +32,14 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       <div className="flex h-full items-center gap-4 px-4 lg:px-8">
         {/* Mobile menu trigger */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild className="lg:hidden">
+            <SheetTrigger asChild className="lg:hidden">
             <Button variant="ghost" size="icon">
               <Menu className="h-5 w-5" />
-              <span className="sr-only">Menu</span>
+              <span className="sr-only">{translations.tr.menu_label}</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0 bg-primary text-primary-foreground">
-            <SheetTitle className="sr-only">Admin Navigation</SheetTitle>
+            <SheetTitle className="sr-only">{translations.tr.admin_navigation}</SheetTitle>
             <AdminSidebar />
           </SheetContent>
         </Sheet>
@@ -49,7 +50,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search products, orders..."
+              placeholder={translations.tr.admin_search_placeholder}
               className="pl-10 bg-muted/50 border-0"
             />
           </div>
@@ -57,10 +58,10 @@ export function AdminHeader({ user }: AdminHeaderProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />
-            <span className="sr-only">Notifications</span>
+            <span className="sr-only">{translations.tr.notifications ?? 'Notifications'}</span>
           </Button>
 
           <DropdownMenu>
@@ -78,7 +79,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
               <DropdownMenuItem asChild>
                 <Link href="/admin/profil">
                   <User className="mr-2 h-4 w-4" />
-                  Profile
+                  {translations.tr.profile}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -86,8 +87,8 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="text-destructive focus:text-destructive"
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
+                  <LogOut className="mr-2 h-4 w-4" />
+                {translations.tr.sign_out}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

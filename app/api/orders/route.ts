@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateOrderNumber } from '@/lib/utils'
+import { translations } from '@/translations'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     if (!addressId) {
       return NextResponse.json(
-        { error: 'Address is required' },
+        { error: translations.tr.select_delivery_address },
         { status: 400 }
       )
     }
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (!address) {
       return NextResponse.json(
-        { error: 'Invalid address' },
+        { error: translations.tr.invalid_address },
         { status: 400 }
       )
     }
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
     for (const item of cart.items) {
       if (item.variant.stock < item.quantity) {
         return NextResponse.json(
-          { error: `${item.product.name} için yeterli stok yok` },
+          { error: `${item.product.name}${translations.tr.insufficient_stock_suffix}` },
           { status: 400 }
         )
       }
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Order creation error:', error)
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      { error: translations.tr.order_create_failed },
       { status: 500 }
     )
   }
@@ -166,7 +167,7 @@ export async function GET() {
   } catch (error) {
     console.error('Orders GET error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch orders' },
+      { error: translations.tr.orders_fetch_failed },
       { status: 500 }
     )
   }

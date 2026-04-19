@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { translations } from '@/translations'
 import ActionMenu from '@/components/admin/action-menu'
 import { Badge } from '@/components/ui/badge'
 import { prisma } from '@/lib/prisma'
@@ -40,13 +41,13 @@ async function ProductsTable() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>All Products ({products.length})</CardTitle>
+        <CardTitle>{translations.tr.all_products} ({products.length})</CardTitle>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search products..."
+              placeholder={translations.tr.admin_search_placeholder}
               className="pl-10 w-64"
             />
           </div>
@@ -57,12 +58,12 @@ async function ProductsTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">Image</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="w-16">{translations.tr.image_label}</TableHead>
+                <TableHead>{translations.tr.product_label}</TableHead>
+                <TableHead>{translations.tr.category_label}</TableHead>
+                <TableHead>{translations.tr.price_label}</TableHead>
+                <TableHead>{translations.tr.stock_label}</TableHead>
+                <TableHead>{translations.tr.status_label}</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -82,7 +83,7 @@ async function ProductsTable() {
                           />
                         ) : (
                           <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
-                            No img
+                            {translations.tr.no_image}
                           </div>
                         )}
                       </div>
@@ -112,18 +113,18 @@ async function ProductsTable() {
                     <TableCell>
                       <div className="flex gap-1">
                         {product.isActive ? (
-                          <Badge variant="secondary">Active</Badge>
+                          <Badge variant="secondary">{translations.tr.active_label}</Badge>
                         ) : (
-                          <Badge variant="outline">Draft</Badge>
+                          <Badge variant="outline">{translations.tr.draft_label}</Badge>
                         )}
                         {product.isFeatured && (
-                          <Badge className="bg-accent text-accent-foreground">Featured</Badge>
+                          <Badge className="bg-accent text-accent-foreground">{translations.tr.featured_label}</Badge>
                         )}
                         {product.isBestSeller && (
-                          <Badge className="bg-yellow-100 text-yellow-800">Best Seller</Badge>
+                          <Badge className="bg-yellow-100 text-yellow-800">{translations.tr.best_seller_label}</Badge>
                         )}
                         {product.isNew && (
-                          <Badge className="bg-green-100 text-green-800">New</Badge>
+                          <Badge className="bg-green-100 text-green-800">{translations.tr.new_badge}</Badge>
                         )}
                       </div>
                     </TableCell>
@@ -137,11 +138,11 @@ async function ProductsTable() {
           </Table>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No products found</p>
+            <p className="text-muted-foreground mb-4">{translations.tr.no_products_found}</p>
             <Button asChild>
               <Link href="/admin/urunler/yeni">
                 <Plus className="mr-2 h-4 w-4" />
-                Add First Product
+                {translations.tr.add_first_product}
               </Link>
             </Button>
           </div>
@@ -156,20 +157,20 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-serif">Products</h1>
-          <p className="text-muted-foreground">Manage your product catalog</p>
+          <h1 className="text-3xl font-serif">{translations.tr.products}</h1>
+          <p className="text-muted-foreground">{translations.tr.manage_product_catalog}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/admin/urunler/import">
               <Upload className="mr-2 h-4 w-4" />
-              Import
+              {translations.tr.import_products}
             </Link>
           </Button>
           <Button asChild>
             <Link href="/admin/urunler/yeni">
               <Plus className="mr-2 h-4 w-4" />
-              Add Product
+              {translations.tr.add_product}
             </Link>
           </Button>
         </div>

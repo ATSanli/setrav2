@@ -7,6 +7,7 @@ import { Heart } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn, formatPrice } from '@/lib/utils'
+import { useT } from '@/components/providers/language-provider'
 
 interface ProductCardProps {
   id: string
@@ -34,6 +35,7 @@ export function ProductCard({
 }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const t = useT()
 
   const discount = comparePrice 
     ? Math.round(((comparePrice - price) / comparePrice) * 100) 
@@ -51,16 +53,16 @@ export function ProductCard({
     e.stopPropagation()
     const variantId = (colors && (colors as any)[0] && (colors as any)[0].id) || null
     if (!variantId) {
-      toast.error('Please select a variant on product page')
+      toast.error(t('select_variant_message'))
       return
     }
     try {
       const res = await fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: id, variantId, quantity: 1 }) })
       const js = await res.json()
-      if (!res.ok) throw new Error(js?.error || 'Failed')
-      toast.success('Added to cart')
+      if (!res.ok) throw new Error(js?.error || t('add_failed'))
+      toast.success(t('added_to_cart'))
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to add to cart')
+      toast.error(err?.message || t('add_failed'))
     }
   }
 
@@ -82,7 +84,7 @@ export function ProductCard({
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {isNew && (
               <span className="px-2 py-1 bg-primary text-primary-foreground text-xs uppercase tracking-wider">
-                Yeni
+                {t('new_badge')}
               </span>
             )}
             {discount && (
@@ -121,9 +123,9 @@ export function ProductCard({
                 window.location.href = `/urun/${slug}`
               }}
             >
-              Hızlı Bakış
+              {t('quick_view')}
             </Button>
-            <Button variant="ghost" className="bg-background/95 hover:bg-background" onClick={handleAddToCart}>Sepete Ekle</Button>
+            <Button variant="ghost" className="bg-background/95 hover:bg-background" onClick={handleAddToCart}>{t('add_to_cart')}</Button>
           </div>
         </div>
 

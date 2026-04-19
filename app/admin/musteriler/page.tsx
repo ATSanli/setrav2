@@ -15,6 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
+import { translations } from '@/translations'
 
 async function getCustomers() {
   try {
@@ -41,13 +42,13 @@ async function CustomersTable() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>All Customers ({customers.length})</CardTitle>
+        <CardTitle>{translations.tr.customers} ({customers.length})</CardTitle>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search customers..."
+              placeholder={translations.tr.admin_search_placeholder}
               className="pl-10 w-64"
             />
           </div>
@@ -57,14 +58,14 @@ async function CustomersTable() {
         {customers.length > 0 ? (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Orders</TableHead>
-                <TableHead>Total Spent</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="w-24"></TableHead>
-              </TableRow>
+                <TableRow>
+                  <TableHead>{translations.tr.customer_label}</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>{translations.tr.orders_label}</TableHead>
+                  <TableHead>{translations.tr.total_spent_label}</TableHead>
+                  <TableHead>{translations.tr.joined_label}</TableHead>
+                  <TableHead className="w-24"></TableHead>
+                </TableRow>
             </TableHeader>
             <TableBody>
               {customers.map((customer) => {
@@ -122,7 +123,7 @@ async function CustomersTable() {
           </Table>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No customers yet</p>
+            <p className="text-muted-foreground">{translations.tr.no_customers_yet}</p>
           </div>
         )}
       </CardContent>

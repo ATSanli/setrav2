@@ -21,15 +21,16 @@ import {
 } from '@/components/ui/select'
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
+import { translations } from '@/translations'
 
 function OrderStatusBadge({ status }: { status: string }) {
   const statusConfig: Record<string, { label: string, className: string }> = {
-    PENDING: { label: 'Beklemede', className: 'bg-yellow-100 text-yellow-800' },
-    CONFIRMED: { label: 'Onaylandı', className: 'bg-blue-100 text-blue-800' },
-    PROCESSING: { label: 'Hazırlanıyor', className: 'bg-purple-100 text-purple-800' },
-    SHIPPED: { label: 'Kargoda', className: 'bg-indigo-100 text-indigo-800' },
-    DELIVERED: { label: 'Teslim Edildi', className: 'bg-green-100 text-green-800' },
-    CANCELLED: { label: 'İptal', className: 'bg-red-100 text-red-800' },
+    PENDING: { label: translations.tr.status_pending ?? 'Beklemede', className: 'bg-yellow-100 text-yellow-800' },
+    CONFIRMED: { label: translations.tr.status_confirmed ?? 'Onaylandı', className: 'bg-blue-100 text-blue-800' },
+    PROCESSING: { label: translations.tr.status_processing ?? 'Hazırlanıyor', className: 'bg-purple-100 text-purple-800' },
+    SHIPPED: { label: translations.tr.status_shipped ?? 'Kargoda', className: 'bg-indigo-100 text-indigo-800' },
+    DELIVERED: { label: translations.tr.status_delivered ?? 'Teslim Edildi', className: 'bg-green-100 text-green-800' },
+    CANCELLED: { label: translations.tr.status_cancelled ?? 'İptal', className: 'bg-red-100 text-red-800' },
   }
 
   const config = statusConfig[status] || { label: status, className: 'bg-gray-100 text-gray-800' }
@@ -67,13 +68,13 @@ async function OrdersTable() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>All Orders ({orders.length})</CardTitle>
+        <CardTitle>{translations.tr.orders} ({orders.length})</CardTitle>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search orders..."
+              placeholder={translations.tr.admin_search_placeholder}
               className="pl-10 w-64"
             />
           </div>
@@ -99,12 +100,12 @@ async function OrdersTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>{translations.tr.order_label ?? 'Sipariş'}</TableHead>
+                <TableHead>{translations.tr.customer_label ?? 'Müşteri'}</TableHead>
+                <TableHead>{translations.tr.items_label ?? 'Ürünler'}</TableHead>
+                <TableHead>{translations.tr.total_label ?? 'Toplam'}</TableHead>
+                <TableHead>{translations.tr.status_label ?? 'Durum'}</TableHead>
+                <TableHead>{translations.tr.date_label ?? 'Tarih'}</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>

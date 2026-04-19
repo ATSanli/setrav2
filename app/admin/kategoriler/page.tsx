@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { prisma } from '@/lib/prisma'
+import { translations } from '@/translations'
 
 async function getCategories() {
   try {
@@ -32,12 +33,12 @@ async function CategoriesTable() {
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
-        <CardTitle>Categories ({categories.length})</CardTitle>
+        <CardTitle>{translations.tr.categories} ({categories.length})</CardTitle>
         <div>
           <Button asChild>
             <Link href="/admin/kategoriler/yeni">
               <Plus className="mr-2 h-4 w-4" />
-              Add Category
+              {translations.tr.add_category}
             </Link>
           </Button>
         </div>
@@ -46,13 +47,13 @@ async function CategoriesTable() {
         {categories.length > 0 ? (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Products</TableHead>
-                <TableHead>Children</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
+                <TableRow>
+                  <TableHead>{translations.tr.name_label ?? 'Name'}</TableHead>
+                  <TableHead>{translations.tr.slug_label ?? 'Slug'}</TableHead>
+                  <TableHead>{translations.tr.products_label ?? 'Products'}</TableHead>
+                  <TableHead>{translations.tr.children_label ?? 'Children'}</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
             </TableHeader>
             <TableBody>
               {categories.map((cat) => (

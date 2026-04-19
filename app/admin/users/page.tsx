@@ -1,4 +1,5 @@
 import UsersManager from '@/components/admin/users-manager'
+import { translations } from '@/translations'
 import { requirePermission } from '@/lib/permissions'
 
 export default async function Page() {
@@ -11,8 +12,8 @@ export default async function Page() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-serif">Users</h1>
-        <p className="text-muted-foreground">Manage admin and application users</p>
+        <h1 className="text-3xl font-serif">{translations.tr.users}</h1>
+        <p className="text-muted-foreground">{translations.tr.manage_users ?? 'Manage admin and application users'}</p>
       </div>
       {/* @ts-expect-error Server -> Client */}
       <UsersManager />

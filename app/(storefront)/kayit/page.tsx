@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useT } from '@/components/providers/language-provider'
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'Ad en az 2 karakter olmalıdır'),
@@ -34,6 +35,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const t = useT()
 
   const {
     register,
@@ -71,10 +73,10 @@ export default function RegisterPage() {
         throw new Error(result.error || 'Kayıt başarısız')
       }
 
-      toast.success('Kayıt başarılı! Giriş yapabilirsiniz.')
+      toast.success(t('register_success'))
       router.push('/giris')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Bir hata oluştu')
+      toast.error(error instanceof Error ? error.message : t('product_add_error'))
     } finally {
       setIsLoading(false)
     }
@@ -88,19 +90,19 @@ export default function RegisterPage() {
             <Link href="/" className="font-serif text-3xl tracking-[0.2em]">
               SETRA
             </Link>
-            <h1 className="mt-6 font-serif text-2xl">Kayıt Ol</h1>
+            <h1 className="mt-6 font-serif text-2xl">{t('register_title')}</h1>
             <p className="text-muted-foreground mt-2">
-              Yeni bir hesap oluşturun
+              {t('register_subtitle')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">Ad</Label>
+                <Label htmlFor="firstName">{t('first_name')}</Label>
                 <Input
                   id="firstName"
-                  placeholder="Adınız"
+                  placeholder={t('first_name')}
                   {...register('firstName')}
                 />
                 {errors.firstName && (
@@ -108,10 +110,10 @@ export default function RegisterPage() {
                 )}
               </div>
               <div>
-                <Label htmlFor="lastName">Soyad</Label>
+                <Label htmlFor="lastName">{t('last_name')}</Label>
                 <Input
                   id="lastName"
-                  placeholder="Soyadınız"
+                  placeholder={t('last_name')}
                   {...register('lastName')}
                 />
                 {errors.lastName && (
@@ -121,11 +123,11 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <Label htmlFor="email">E-posta</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="ornek@email.com"
+                placeholder={t('email_placeholder')}
                 {...register('email')}
               />
               {errors.email && (
@@ -134,7 +136,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <Label htmlFor="phone">Telefon (Opsiyonel)</Label>
+              <Label htmlFor="phone">{t('phone_label')}</Label>
               <Input
                 id="phone"
                 placeholder="05XX XXX XX XX"
@@ -143,7 +145,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <Label htmlFor="password">Şifre</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -169,7 +171,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword">Şifre Tekrar</Label>
+              <Label htmlFor="confirmPassword">{t('confirm_password')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -189,13 +191,8 @@ export default function RegisterPage() {
               />
               <label htmlFor="acceptTerms" className="text-sm leading-tight">
                 <Link href="/kullanim-kosullari" className="underline">
-                  Kullanım koşullarını
-                </Link>{' '}
-                ve{' '}
-                <Link href="/gizlilik-politikasi" className="underline">
-                  gizlilik politikasını
-                </Link>{' '}
-                okudum ve kabul ediyorum.
+                  {t('accept_terms_text')}
+                </Link>
               </label>
             </div>
             {errors.acceptTerms && (
@@ -203,17 +200,17 @@ export default function RegisterPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
+              {isLoading ? t('register_loading') : t('register_title')}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Zaten hesabınız var mı?{' '}
+            {t('already_have_account')}{' '}
             <Link
               href="/giris"
               className="text-foreground font-medium hover:underline"
             >
-              Giriş Yapın
+              {t('sign_in')}
             </Link>
           </p>
         </div>

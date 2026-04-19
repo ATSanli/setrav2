@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/components/providers/language-provider'
 
 interface SearchDialogProps {
   open: boolean
@@ -27,6 +28,7 @@ const popularSearches = [
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const router = useRouter()
   const [query, setQuery] = useState('')
+  const t = useT()
 
   useEffect(() => {
     if (!open) {
@@ -50,12 +52,12 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl p-0 gap-0">
-        <DialogTitle className="sr-only">Ürün Ara</DialogTitle>
+        <DialogTitle className="sr-only">{t('search_title')}</DialogTitle>
         <form onSubmit={handleSearch} className="flex items-center border-b">
           <Search className="h-5 w-5 ml-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Ürün ara..."
+            placeholder={t('search_placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 border-0 focus-visible:ring-0 text-lg py-6"
@@ -73,7 +75,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         </form>
         
         <div className="p-4">
-          <p className="text-sm text-muted-foreground mb-3">Popüler Aramalar</p>
+          <p className="text-sm text-muted-foreground mb-3">{t('popular_searches_label')}</p>
           <div className="flex flex-wrap gap-2">
             {popularSearches.map((term) => (
               <button

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChevronRight, Search } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { ProductCard } from '@/components/product-card'
+import { translations } from '@/translations'
 
 interface Props {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -84,21 +85,21 @@ export default async function SearchPage({ searchParams }: Props) {
             <ol className="flex items-center gap-2 text-sm">
               <li>
                 <Link href="/" className="text-muted-foreground hover:text-foreground">
-                  Ana Sayfa
+                  {translations.tr.home}
                 </Link>
               </li>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              <li className="font-medium">Arama</li>
+              <li className="font-medium">{translations.tr.search_title || 'Arama'}</li>
             </ol>
           </nav>
           <div className="flex items-center gap-3">
             <Search className="h-8 w-8 text-muted-foreground" />
             <div>
               <h1 className="font-serif text-3xl lg:text-4xl">
-                {query ? `"${query}"` : 'Arama'}
+                {query ? `"${query}"` : translations.tr.search_title}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {total > 0 ? `${total} sonuç bulundu` : 'Sonuç bulunamadı'}
+                {total > 0 ? `${total} ${translations.tr.results_found}` : translations.tr.no_results}
               </p>
             </div>
           </div>
@@ -126,20 +127,20 @@ export default async function SearchPage({ searchParams }: Props) {
         ) : query ? (
           <div className="text-center py-16">
             <Search className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-            <h2 className="text-xl font-medium mb-2">Sonuç bulunamadı</h2>
+              <h2 className="text-xl font-medium mb-2">{translations.tr.no_results}</h2>
             <p className="text-muted-foreground mb-6">
               &quot;{query}&quot; için herhangi bir ürün bulunamadı.
             </p>
             <p className="text-sm text-muted-foreground">
-              Farklı anahtar kelimeler deneyebilir veya kategorilere göz atabilirsiniz.
+              {translations.tr.try_other_keywords}
             </p>
           </div>
         ) : (
           <div className="text-center py-16">
             <Search className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-            <h2 className="text-xl font-medium mb-2">Arama yapın</h2>
+            <h2 className="text-xl font-medium mb-2">{translations.tr.search_prompt}</h2>
             <p className="text-muted-foreground">
-              Ürün aramak için yukarıdaki arama kutusunu kullanın.
+              {translations.tr.use_search_box}
             </p>
           </div>
         )}

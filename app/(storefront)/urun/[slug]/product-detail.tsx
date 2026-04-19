@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProductCard } from '@/components/product-card'
 import { useCart } from '@/hooks/use-cart'
 import { cn, formatPrice } from '@/lib/utils'
+import { useT } from '@/components/providers/language-provider'
 
 interface ProductDetailProps {
   product: {
@@ -58,6 +59,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const t = useT()
 
   // Get available sizes for selected color
   const availableSizes = product.variants
@@ -75,12 +77,12 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
 
   const handleAddToCart = async () => {
     if (!selectedSize) {
-      toast.error('Lütfen beden seçiniz')
+      toast.error(t('select_size'))
       return
     }
 
     if (!selectedVariant) {
-      toast.error('Bu varyant bulunamadı')
+      toast.error(t('variant_not_found'))
       return
     }
 
@@ -89,9 +91,9 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
     setIsAddingToCart(false)
 
     if (result.success) {
-      toast.success('Ürün sepete eklendi')
+      toast.success(t('product_added'))
     } else {
-      toast.error(result.error || 'Bir hata oluştu')
+      toast.error(result.error || t('product_add_error'))
     }
   }
 
@@ -102,7 +104,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
         <ol className="flex items-center gap-2 text-sm text-muted-foreground">
           <li>
             <Link href="/" className="hover:text-foreground transition-colors">
-              Ana Sayfa
+              {t('home')}
             </Link>
           </li>
           <ChevronRight className="h-4 w-4" />
@@ -143,7 +145,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               )}
               {product.isNew && (
                 <span className="absolute top-4 left-4 px-3 py-1.5 bg-primary text-primary-foreground text-xs uppercase tracking-wider">
-                  Yeni
+                  {t('new_badge')}
                 </span>
               )}
               {discount && (
@@ -226,7 +228,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             {product.colors.length > 0 && (
               <div>
                 <p className="text-sm font-medium mb-3">
-                  Renk: <span className="text-muted-foreground">{selectedColor}</span>
+                  {t('color_label')}: <span className="text-muted-foreground">{selectedColor}</span>
                 </p>
                 <div className="flex gap-2">
                   {product.colors.map((c) => (
@@ -254,12 +256,12 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             {product.sizes.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-medium">Beden</p>
+                  <p className="text-sm font-medium">{t('size_label')}</p>
                   <Link
                     href="/beden-rehberi"
                     className="text-sm text-muted-foreground hover:text-foreground underline"
                   >
-                    Beden Rehberi
+                    {t('size_guide')}
                   </Link>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -289,7 +291,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
 
             {/* Quantity */}
             <div>
-              <p className="text-sm font-medium mb-3">Adet</p>
+              <p className="text-sm font-medium mb-3">{t('quantity_label')}</p>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border">
                   <button
@@ -310,7 +312,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 </div>
                 {selectedVariant && (
                   <span className="text-sm text-muted-foreground">
-                    Stok: {selectedVariant.stock} adet
+                    {t('stock_label')}: {selectedVariant.stock} {t('pieces')}
                   </span>
                 )}
               </div>
@@ -324,7 +326,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 onClick={handleAddToCart}
                 disabled={isAddingToCart || !selectedSize}
               >
-                {isAddingToCart ? 'Ekleniyor...' : 'Sepete Ekle'}
+                {isAddingToCart ? t('adding') : t('add_to_cart')}
               </Button>
               <Button size="lg" variant="outline" className="h-14 w-14">
                 <Heart className="h-5 w-5" />
@@ -335,15 +337,15 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             <div className="grid grid-cols-3 gap-4 pt-6 border-t">
               <div className="text-center">
                 <Truck className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Ücretsiz Kargo</p>
+                <p className="text-xs text-muted-foreground">{t('shipping')}</p>
               </div>
               <div className="text-center">
                 <RotateCcw className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">14 Gün İade</p>
+                <p className="text-xs text-muted-foreground">{t('free_returns')}</p>
               </div>
               <div className="text-center">
                 <Shield className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Güvenli Ödeme</p>
+                <p className="text-xs text-muted-foreground">{t('secure_order')}</p>
               </div>
             </div>
 
@@ -360,17 +362,17 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
         <div className="container mx-auto px-4 py-12">
           <Tabs defaultValue="description" className="max-w-3xl">
             <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
-              <TabsTrigger
-                value="description"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-              >
-                Ürün Açıklaması
-              </TabsTrigger>
+                <TabsTrigger
+                  value="description"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
+                >
+                  {t('description_label')}
+                </TabsTrigger>
               <TabsTrigger
                 value="reviews"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
               >
-                Değerlendirmeler ({product.reviewCount})
+                {`${t('reviews_label')} (${product.reviewCount})`}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="description" className="pt-6">
@@ -379,7 +381,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                   <p className="whitespace-pre-wrap">{product.description}</p>
                 </div>
               ) : (
-                <p className="text-muted-foreground">Ürün açıklaması bulunmamaktadır.</p>
+                <p className="text-muted-foreground">{t('product_description_missing')}</p>
               )}
             </TabsContent>
             <TabsContent value="reviews" className="pt-6">
@@ -416,9 +418,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">
-                  Henüz değerlendirme yapılmamış. İlk değerlendiren siz olun!
-                </p>
+                <p className="text-muted-foreground">{t('no_reviews_yet')}</p>
               )}
             </TabsContent>
           </Tabs>
@@ -429,7 +429,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
       {relatedProducts.length > 0 && (
         <section className="border-t bg-secondary/30">
           <div className="container mx-auto px-4 py-16">
-            <h2 className="font-serif text-2xl lg:text-3xl mb-8">Benzer Ürünler</h2>
+            <h2 className="font-serif text-2xl lg:text-3xl mb-8">{t('similar_products')}</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {relatedProducts.map((product) => (
                 <ProductCard

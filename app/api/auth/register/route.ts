@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { translations } from '@/translations'
 
 const registerSchema = z.object({
   firstName: z.string().min(2),
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Bu e-posta adresi zaten kayıtlı' },
+        { error: translations.tr.email_already_registered },
         { status: 400 }
       )
     }
@@ -56,12 +57,12 @@ export async function POST(request: NextRequest) {
     console.error('Registration error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Geçersiz veri', details: error.errors },
+        { error: translations.tr.invalid_data, details: error.errors },
         { status: 400 }
       )
     }
     return NextResponse.json(
-      { error: 'Kayıt başarısız' },
+      { error: translations.tr.registration_failed },
       { status: 500 }
     )
   }

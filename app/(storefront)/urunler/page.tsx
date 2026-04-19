@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { ProductCard } from '@/components/product-card'
+import { translations } from '@/translations'
 import { ProductsFilter } from './products-filter'
 
 export const metadata: Metadata = {
@@ -101,16 +102,16 @@ export default async function ProductsPage({ searchParams }: Props) {
             <ol className="flex items-center gap-2 text-sm">
               <li>
                 <Link href="/" className="text-muted-foreground hover:text-foreground">
-                  Ana Sayfa
+                  {translations.tr.home}
                 </Link>
               </li>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              <li className="font-medium">Tüm Ürünler</li>
+              <li className="font-medium">{translations.tr.all_products}</li>
             </ol>
           </nav>
-          <h1 className="font-serif text-3xl lg:text-4xl">Tüm Ürünler</h1>
+          <h1 className="font-serif text-3xl lg:text-4xl">{translations.tr.all_products}</h1>
           <p className="text-muted-foreground mt-2">
-            {total} ürün listeleniyor
+            {total} {translations.tr.products_listed}
           </p>
         </div>
       </div>

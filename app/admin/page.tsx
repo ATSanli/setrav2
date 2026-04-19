@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
+import { translations } from '@/translations'
 
 async function getStats() {
   try {
@@ -133,7 +134,7 @@ async function DashboardContent() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Revenue"
+          title={translations.tr.total_revenue ?? 'Toplam Gelir'}
           value={formatPrice(Number(stats.totalRevenue))}
           change="+12.5%"
           changeType="positive"
@@ -141,7 +142,7 @@ async function DashboardContent() {
           href="/admin/analitik"
         />
         <StatCard
-          title="Total Orders"
+          title={translations.tr.total_orders ?? 'Toplam Sipariş'}
           value={stats.totalOrders}
           change="+8.2%"
           changeType="positive"
@@ -149,13 +150,13 @@ async function DashboardContent() {
           href="/admin/siparisler"
         />
         <StatCard
-          title="Total Products"
+          title={translations.tr.total_products ?? 'Toplam Ürün'}
           value={stats.totalProducts}
           icon={Package}
           href="/admin/urunler"
         />
         <StatCard
-          title="Total Customers"
+          title={translations.tr.total_customers ?? 'Toplam Müşteri'}
           value={stats.totalCustomers}
           change="+15.3%"
           changeType="positive"
@@ -169,16 +170,16 @@ async function DashboardContent() {
         {/* Quick Actions */}
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks and shortcuts</CardDescription>
+            <CardTitle>{translations.tr.quick_actions}</CardTitle>
+            <CardDescription>{translations.tr.common_tasks}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <Button asChild variant="outline" className="h-auto py-4 justify-start">
               <Link href="/admin/urunler/yeni">
                 <Package className="mr-3 h-5 w-5" />
                 <div className="text-left">
-                  <div className="font-medium">Add Product</div>
-                  <div className="text-xs text-muted-foreground">Create new product</div>
+                  <div className="font-medium">{translations.tr.add_product}</div>
+                  <div className="text-xs text-muted-foreground">{translations.tr.create_new_product}</div>
                 </div>
               </Link>
             </Button>
@@ -186,8 +187,8 @@ async function DashboardContent() {
               <Link href="/admin/siparisler?status=PENDING">
                 <ShoppingCart className="mr-3 h-5 w-5" />
                 <div className="text-left">
-                  <div className="font-medium">Pending Orders</div>
-                  <div className="text-xs text-muted-foreground">{stats.pendingOrders} orders waiting</div>
+                  <div className="font-medium">{translations.tr.pending_orders_label}</div>
+                  <div className="text-xs text-muted-foreground">{stats.pendingOrders}{translations.tr.pending_orders_info_suffix}</div>
                 </div>
               </Link>
             </Button>
@@ -216,11 +217,11 @@ async function DashboardContent() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Recent Orders</CardTitle>
-              <CardDescription>Latest customer orders</CardDescription>
+              <CardTitle>{translations.tr.recent_orders}</CardTitle>
+              <CardDescription>{translations.tr.latest_customer_orders}</CardDescription>
             </div>
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/siparisler">View All</Link>
+              <Link href="/admin/siparisler">{translations.tr.view_all}</Link>
             </Button>
           </CardHeader>
           <CardContent>
@@ -261,8 +262,8 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-serif">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back to SETRA Admin</p>
+        <h1 className="text-3xl font-serif">{translations.tr.dashboard}</h1>
+        <p className="text-muted-foreground">{translations.tr.welcome_back_admin}</p>
       </div>
 
       <Suspense fallback={<DashboardSkeleton />}>

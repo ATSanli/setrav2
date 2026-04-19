@@ -37,7 +37,7 @@ export function CartContent() {
   const handleRemoveItem = async (itemId: string) => {
     const result = await removeItem(itemId)
     if (result.success) {
-      toast.success(t('cart_empty_text'))
+      toast.success(t('removed_from_cart'))
     } else {
       toast.error(result.error)
     }
@@ -77,10 +77,10 @@ export function CartContent() {
       <div className="lg:col-span-2 space-y-4">
         {/* Free shipping progress */}
         {remainingForFreeShipping > 0 && (
-          <div className="bg-accent/10 border border-accent/20 rounded-sm p-4">
+              <div className="bg-accent/10 border border-accent/20 rounded-sm p-4">
             <p className="text-sm text-center">
               <span className="font-medium">{formatPrice(remainingForFreeShipping)}</span> daha ekleyin, 
-              <span className="font-medium text-accent"> ücretsiz kargo</span> kazanın!
+              <span className="font-medium text-accent">{t('free')} {t('shipping')}</span> kazanın!
             </p>
             <div className="mt-2 h-2 bg-secondary rounded-full overflow-hidden">
               <div 

@@ -1,6 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
+import { useT } from '@/components/providers/language-provider'
 import { CartItemDisplay } from '@/types'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
@@ -12,6 +13,7 @@ interface CartData {
 }
 
 export function useCart() {
+  const t = useT()
   const { data, error, isLoading, mutate } = useSWR<CartData>(
     '/api/cart',
     fetcher,
@@ -34,7 +36,7 @@ export function useCart() {
       mutate()
       return { success: true }
     } catch {
-      return { success: false, error: 'Ürün sepete eklenemedi' }
+      return { success: false, error: t('cart_add_failed') }
     }
   }
 
@@ -51,7 +53,7 @@ export function useCart() {
       mutate()
       return { success: true }
     } catch {
-      return { success: false, error: 'Miktar güncellenemedi' }
+      return { success: false, error: t('cart_update_failed') }
     }
   }
 
@@ -66,7 +68,7 @@ export function useCart() {
       mutate()
       return { success: true }
     } catch {
-      return { success: false, error: 'Ürün silinemedi' }
+      return { success: false, error: t('cart_remove_failed') }
     }
   }
 
@@ -81,7 +83,7 @@ export function useCart() {
       mutate()
       return { success: true }
     } catch {
-      return { success: false, error: 'Sepet temizlenemedi' }
+      return { success: false, error: t('cart_clear_failed') }
     }
   }
 

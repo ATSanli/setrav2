@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { formatPrice } from '@/lib/utils'
+import { translations } from '@/translations'
 
 interface Props {
   params: Promise<{ orderNumber: string }>
@@ -63,12 +64,12 @@ export default async function OrderConfirmationPage({ params }: Props) {
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-10 w-10 text-green-600" />
             </div>
-            <h1 className="font-serif text-3xl mb-2">Siparişiniz Alındı!</h1>
+            <h1 className="font-serif text-3xl mb-2">{translations.tr.order_received}</h1>
             <p className="text-muted-foreground">
-              Sipariş numaranız: <span className="font-medium text-foreground">{order.orderNumber}</span>
+              {translations.tr.order_number_prefix} <span className="font-medium text-foreground">{order.orderNumber}</span>
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              Sipariş detaylarını e-posta adresinize gönderdik.
+              {translations.tr.order_details_sent}
             </p>
           </div>
 
@@ -76,7 +77,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
           <div className="bg-background rounded-sm p-6 space-y-6">
             {/* Delivery info */}
             <div>
-              <h2 className="font-medium mb-3">Teslimat Adresi</h2>
+              <h2 className="font-medium mb-3">{translations.tr.delivery_address}</h2>
               <div className="text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">{order.address.fullName}</p>
                 <p>{order.address.address}</p>
@@ -89,7 +90,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
             {/* Items */}
             <div>
-              <h2 className="font-medium mb-4">Sipariş Detayları</h2>
+              <h2 className="font-medium mb-4">{translations.tr.order_details_label}</h2>
               <div className="space-y-4">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex gap-4">
@@ -104,7 +105,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium line-clamp-1">{item.productName}</p>
                       <p className="text-sm text-muted-foreground">{item.variantInfo}</p>
-                      <p className="text-sm text-muted-foreground">Adet: {item.quantity}</p>
+                      <p className="text-sm text-muted-foreground">{translations.tr.quantity_label}: {item.quantity}</p>
                     </div>
                     <p className="font-medium">
                       {formatPrice(Number(item.price) * item.quantity)}
@@ -119,18 +120,18 @@ export default async function OrderConfirmationPage({ params }: Props) {
             {/* Totals */}
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Ara Toplam</span>
+                <span className="text-muted-foreground">{translations.tr.subtotal}</span>
                 <span>{formatPrice(Number(order.subtotal))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Kargo</span>
+                <span className="text-muted-foreground">{translations.tr.shipping}</span>
                 <span className={Number(order.shippingCost) === 0 ? 'text-accent' : ''}>
-                  {Number(order.shippingCost) === 0 ? 'Ücretsiz' : formatPrice(Number(order.shippingCost))}
+                  {Number(order.shippingCost) === 0 ? translations.tr.free : formatPrice(Number(order.shippingCost))}
                 </span>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between font-medium text-base">
-                <span>Toplam</span>
+                <span>{translations.tr.total_label}</span>
                 <span>{formatPrice(Number(order.total))}</span>
               </div>
             </div>
@@ -139,8 +140,8 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
             {/* Payment method */}
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Ödeme Yöntemi</span>
-              <span>Kapıda Ödeme</span>
+              <span className="text-muted-foreground">{translations.tr.payment_method}</span>
+              <span>{translations.tr.cod_label}</span>
             </div>
 
             {/* Order note */}
@@ -162,10 +163,9 @@ export default async function OrderConfirmationPage({ params }: Props) {
                 <Package className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-medium mb-1">Sonraki Adımlar</h3>
+                <h3 className="font-medium mb-1">{translations.tr.next_steps}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Siparişiniz en kısa sürede hazırlanıp kargoya verilecektir. 
-                  Kargo takip numarası SMS ve e-posta ile tarafınıza iletilecektir.
+                  {translations.tr.order_shipped_info}
                 </p>
               </div>
             </div>
@@ -175,12 +175,12 @@ export default async function OrderConfirmationPage({ params }: Props) {
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <Button asChild className="flex-1">
               <Link href="/hesabim/siparislerim">
-                Siparişlerimi Görüntüle
+                {translations.tr.view_orders}
               </Link>
             </Button>
             <Button variant="outline" asChild className="flex-1">
               <Link href="/">
-                Alışverişe Devam Et
+                {translations.tr.continue_shopping}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

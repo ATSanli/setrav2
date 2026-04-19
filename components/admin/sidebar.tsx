@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { translations } from '@/translations'
 import { 
   LayoutDashboard, 
   Package, 
@@ -18,16 +19,16 @@ import {
 import { cn } from '@/lib/utils'
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Products', href: '/admin/urunler', icon: Package },
-  { name: 'Categories', href: '/admin/kategoriler', icon: FolderTree },
-  { name: 'Orders', href: '/admin/siparisler', icon: ShoppingCart },
-  { name: 'Customers', href: '/admin/musteriler', icon: Users },
-  { name: 'Reviews', href: '/admin/yorumlar', icon: MessageSquare },
-  { name: 'Analytics', href: '/admin/analitik', icon: BarChart3 },
-  { name: 'Media', href: '/admin/medya', icon: ImageIcon },
-  { name: 'Settings', href: '/admin/ayarlar', icon: Settings },
-  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: translations.tr.dashboard, href: '/admin', icon: LayoutDashboard },
+  { name: translations.tr.products || 'Ürünler', href: '/admin/urunler', icon: Package },
+  { name: translations.tr.categories || 'Kategoriler', href: '/admin/kategoriler', icon: FolderTree },
+  { name: translations.tr.orders || 'Siparişler', href: '/admin/siparisler', icon: ShoppingCart },
+  { name: translations.tr.customers || 'Müşteriler', href: '/admin/musteriler', icon: Users },
+  { name: translations.tr.reviews || 'Değerlendirmeler', href: '/admin/yorumlar', icon: MessageSquare },
+  { name: translations.tr.analytics || 'Analitik', href: '/admin/analitik', icon: BarChart3 },
+  { name: translations.tr.media || 'Medya', href: '/admin/medya', icon: ImageIcon },
+  { name: translations.tr.settings || 'Ayarlar', href: '/admin/ayarlar', icon: Settings },
+  { name: translations.tr.users || 'Kullanıcılar', href: '/admin/users', icon: Users },
 ]
 
 export function AdminSidebar() {
@@ -64,7 +65,7 @@ export function AdminSidebar() {
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-4">
           {navigation.map((item) => {
-            if (item.name === 'Products' && !showProducts) return null
+            if (item.href === '/admin/urunler' && !showProducts) return null
             const isActive = pathname === item.href || 
               (item.href !== '/admin' && pathname.startsWith(item.href))
             
@@ -123,7 +124,7 @@ export function AdminSidebar() {
             href="/"
             className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
           >
-            <span>View Store</span>
+            <span>{translations.tr.view_store}</span>
             <span className="text-xs">→</span>
           </Link>
         </div>
