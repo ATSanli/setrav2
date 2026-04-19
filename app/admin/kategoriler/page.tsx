@@ -33,7 +33,7 @@ async function CategoriesTable() {
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
-        <CardTitle>{translations.tr.categories} ({categories.length})</CardTitle>
+          <CardTitle>{translations.tr.categories} ({categories.length})</CardTitle>
         <div>
           <Button asChild>
             <Link href="/admin/kategoriler/yeni">
@@ -78,11 +78,11 @@ async function CategoriesTable() {
           </Table>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No categories found</p>
+            <p className="text-muted-foreground mb-4">{translations.tr.no_categories_found}</p>
             <Button asChild>
               <Link href="/admin/kategoriler/yeni">
                 <Plus className="mr-2 h-4 w-4" />
-                Add First Category
+                {translations.tr.add_first_category}
               </Link>
             </Button>
           </div>
@@ -97,8 +97,8 @@ export default function AdminCategoriesPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-serif">Kategoriler</h1>
-          <p className="text-muted-foreground">Kategorileri yönetin</p>
+          <h1 className="text-3xl font-serif">{translations.tr.categories}</h1>
+          <p className="text-muted-foreground">{translations.tr.manage_categories}</p>
         </div>
         <div></div>
       </div>

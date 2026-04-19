@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
+import { translations } from '@/translations'
 
 export default function UsersManager() {
   const { data: session } = useSession()
@@ -41,9 +42,9 @@ export default function UsersManager() {
         setShowForm(false)
         setForm({ firstName: '', lastName: '', email: '', password: '', role: 'USER' })
         await load()
-        toast({ title: 'User created', description: 'New user created successfully.' })
+        toast({ title: translations.tr.user_created, description: '' })
       } else {
-        toast({ title: 'Create failed', description: j.error || 'Failed to create user.' })
+        toast({ title: translations.tr.create_failed, description: j.error || '' })
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -55,9 +56,9 @@ export default function UsersManager() {
   }
 
   async function removeUser(id: string) {
-    if (!confirm('Delete user?')) return
+    if (!confirm(translations.tr.delete_user_confirm || 'Delete user?')) return
     const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
-    if (res.ok) { await load(); toast({ title: 'Deleted', description: 'User deleted.' }) } else { toast({ title: 'Delete failed', description: 'Could not delete user.' }) }
+    if (res.ok) { await load(); toast({ title: translations.tr.deleted, description: '' }) } else { toast({ title: translations.tr.delete_failed, description: '' }) }
   }
 
   function openEdit(user: any) {
@@ -80,17 +81,17 @@ export default function UsersManager() {
     setSaving(true)
     try {
       const res = await fetch(`/api/admin/users/${editingUser.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editForm) })
-      if (!res.ok) {
+        if (!res.ok) {
         const j = await res.json()
         setUsers(prev)
-        toast({ title: 'Update failed', description: j.error || 'Could not update user.' })
+        toast({ title: translations.tr.update_failed, description: j.error || '' })
       } else {
-        toast({ title: 'Saved', description: 'User updated successfully.' })
+        toast({ title: translations.tr.saved, description: translations.tr.user_updated })
         setEditingUser(null)
       }
     } catch (err) {
       setUsers(prev)
-      toast({ title: 'Update failed', description: 'Network error.' })
+      toast({ title: translations.tr.update_failed, description: '' })
     } finally {
       setSaving(false)
     }
@@ -99,9 +100,9 @@ export default function UsersManager() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Users</h2>
+        <h2 className="text-xl font-semibold">{translations.tr.users}</h2>
         <div className="flex gap-2">
-          <Button onClick={() => setShowForm(true)} className="bg-emerald-600">Create User</Button>
+          <Button onClick={() => setShowForm(true)} className="bg-emerald-600">{translations.tr.create_user}</Button>
         </div>
       </div>
 
@@ -109,7 +110,7 @@ export default function UsersManager() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowForm(false)} />
           <form onSubmit={createUser} className="relative bg-slate-900 p-6 rounded w-full max-w-lg z-10 transform transition-all">
-            <h3 className="text-lg font-semibold mb-4">Create User</h3>
+            <h3 className="text-lg font-semibold mb-4">{translations.tr.create_user}</h3>
             <div className="grid grid-cols-2 gap-2">
               <input className="p-2 bg-slate-800 rounded" placeholder="First name" value={form.firstName} onChange={(e) => setForm(f => ({ ...f, firstName: e.target.value }))} />
               <input className="p-2 bg-slate-800 rounded" placeholder="Last name" value={form.lastName} onChange={(e) => setForm(f => ({ ...f, lastName: e.target.value }))} />
@@ -122,25 +123,25 @@ export default function UsersManager() {
               <option value="SUPER_ADMIN" disabled={session?.user?.role !== 'SUPER_ADMIN'}>SUPER_ADMIN</option>
             </select>
             <div className="flex items-center justify-end gap-2 mt-4">
-              <Button type="button" onClick={() => setShowForm(false)}>Cancel</Button>
-              <Button type="submit" disabled={creating}>{creating ? 'Creating...' : 'Create'}</Button>
+              <Button type="button" onClick={() => setShowForm(false)}>{translations.tr.cancel}</Button>
+              <Button type="submit" disabled={creating}>{creating ? translations.tr.creating : translations.tr.create}</Button>
             </div>
           </form>
         </div>
       )}
 
       <div className="bg-slate-800 rounded p-4">
-        {loading ? <p>Loading...</p> : (
+        {loading ? <p>{translations.tr.loading}</p> : (
           <table className="w-full">
-            <thead>
-              <tr className="text-left">
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th></th>
-              </tr>
-            </thead>
+                <thead>
+                  <tr className="text-left">
+                    <th>{translations.tr.customer_label}</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>{translations.tr.joined_label}</th>
+                    <th></th>
+                  </tr>
+                </thead>
             <tbody>
               {users.map(u => (
                 <tr key={u.id} className="border-t border-slate-700">
@@ -150,8 +151,8 @@ export default function UsersManager() {
                   <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td className="text-right">
                     <div className="flex items-center gap-2 justify-end">
-                      <button onClick={() => openEdit(u)} className="text-emerald-400">Edit</button>
-                      <button onClick={() => removeUser(u.id)} className="text-red-400">Delete</button>
+                      <button onClick={() => openEdit(u)} className="text-emerald-400">{translations.tr.edit}</button>
+                      <button onClick={() => removeUser(u.id)} className="text-red-400">{translations.tr.delete}</button>
                     </div>
                   </td>
                 </tr>
@@ -165,7 +166,7 @@ export default function UsersManager() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setEditingUser(null)} />
           <form onSubmit={saveEdit} className="relative bg-slate-900 p-6 rounded w-full max-w-lg z-10 transform transition-all">
-            <h3 className="text-lg font-semibold mb-4">Edit User</h3>
+            <h3 className="text-lg font-semibold mb-4">{translations.tr.edit_user}</h3>
             <div className="grid grid-cols-2 gap-2">
               <input className="p-2 bg-slate-800 rounded" placeholder="First name" value={editForm.firstName} onChange={(e) => setEditForm(f => ({ ...f, firstName: e.target.value }))} />
               <input className="p-2 bg-slate-800 rounded" placeholder="Last name" value={editForm.lastName} onChange={(e) => setEditForm(f => ({ ...f, lastName: e.target.value }))} />
@@ -177,8 +178,8 @@ export default function UsersManager() {
               <option value="SUPER_ADMIN" disabled={session?.user?.role !== 'SUPER_ADMIN'}>SUPER_ADMIN</option>
             </select>
             <div className="flex items-center justify-end gap-2 mt-4">
-              <Button type="button" onClick={() => setEditingUser(null)}>Cancel</Button>
-              <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
+              <Button type="button" onClick={() => setEditingUser(null)}>{translations.tr.cancel}</Button>
+              <Button type="submit" disabled={saving}>{saving ? translations.tr.saving : translations.tr.save}</Button>
             </div>
           </form>
         </div>

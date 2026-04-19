@@ -6,7 +6,7 @@ export default async function Page() {
   try {
     await requirePermission('user_manage')
   } catch {
-    return <p className="p-6">Unauthorized</p>
+    return <p className="p-6">{translations.tr.unauthorized}</p>
   }
 
   return (
