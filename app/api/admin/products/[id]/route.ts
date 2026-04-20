@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { requirePermission, requireAdminOrSuper } from '@/lib/permissions'
 
 // ✅ GET PRODUCT
@@ -53,26 +54,40 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
       if (Object.prototype.hasOwnProperty.call(body, f)) upData[f] = body[f]
     }
 
-    const updated = await prisma.product.update({
-      where: { id },
-      data: upData
-    })
+    let updated
+    try {
+      updated = await prisma.product.update({ where: { id }, data: upData })
+    } catch (err: any) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        const target = (err.meta as any)?.target
+        const fields = Array.isArray(target) ? target.join(', ') : target
+        return NextResponse.json({ error: `Unique constraint failed on the fields: (${fields})` }, { status: 409 })
+      }
+      throw err
+    }
 
     // 🔥 VARIANTS RESET (only if provided)
     if (Object.prototype.hasOwnProperty.call(body, 'variants')) {
       await prisma.productVariant.deleteMany({ where: { productId: id } })
       const variants = body.variants
       if (Array.isArray(variants) && variants.length > 0) {
-        await prisma.productVariant.createMany({
-          data: variants.map((v: any) => ({
-            productId: id,
-            size: v.size,
-            color: v.color,
-            colorHex: v.colorHex,
-            stock: v.stock,
-            sku: v.sku
-          }))
-        })
+        for (let i = 0; i < variants.length; i++) {
+          const v = variants[i]
+          let variantSku = v.sku && v.sku.trim() ? v.sku.trim() : `${id}-V${i}-${Math.floor(Math.random() * 10000)}`
+          while (await prisma.productVariant.findUnique({ where: { sku: variantSku } })) {
+            variantSku = `${variantSku}-${Math.floor(Math.random() * 1000)}`
+          }
+          await prisma.productVariant.create({
+            data: {
+              productId: id,
+              size: v.size,
+              color: v.color,
+              colorHex: v.colorHex,
+              stock: v.stock,
+              sku: variantSku
+            }
+          })
+        }
       }
     }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { requirePermission, requireAdminOrSuper } from '@/lib/permissions'
 
 export async function GET() {
@@ -78,13 +79,12 @@ export async function POST(request: NextRequest) {
       finalSlug = `${finalSlug}-${Date.now()}`
     }
 
-    // Ensure SKU is unique; generate robust fallback
-    const generateSku = () => `STR-${Date.now()}-${Math.floor(Math.random()*100000)}`
+    // Ensure SKU is unique; generate robust fallback and guard against collisions
+    const generateSku = () => `STR-${Date.now()}-${Math.floor(Math.random() * 100000)}`
     let finalSku = sku && sku.trim() ? sku.trim() : generateSku()
-    // If provided SKU already exists, append suffix
-    const existingSku = await prisma.product.findUnique({ where: { sku: finalSku } })
-    if (existingSku) {
-      finalSku = `${finalSku}-${Date.now()}`
+    // If provided SKU already exists, try appending a small random suffix until unique
+    while (await prisma.product.findUnique({ where: { sku: finalSku } })) {
+      finalSku = `${finalSku}-${Math.floor(Math.random() * 10000)}`
     }
 
     const product = await prisma.product.create({
@@ -100,12 +100,19 @@ export async function POST(request: NextRequest) {
         isFeatured: isFeatured ?? false,
         isNew: isNew ?? true,
         variants: {
-          create: (Array.isArray(variants) ? variants.map((v: any) => ({
-            size: v.size,
-            color: v.color,
-            colorHex: v.colorHex,
-            stock: v.stock,
-            sku: v.sku
+          create: (Array.isArray(variants) ? await Promise.all(variants.map(async (v: any, idx: number) => {
+            // ensure each variant has a sku; if missing generate one and avoid collisions
+            let variantSku = v.sku && v.sku.trim() ? v.sku.trim() : `${finalSku}-V${idx}-${Math.floor(Math.random() * 10000)}`
+            while (await prisma.productVariant.findUnique({ where: { sku: variantSku } })) {
+              variantSku = `${variantSku}-${Math.floor(Math.random() * 1000)}`
+            }
+            return {
+              size: v.size,
+              color: v.color,
+              colorHex: v.colorHex,
+              stock: v.stock,
+              sku: variantSku
+            }
           })) : [])
         },
         images: {
@@ -126,6 +133,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ product }, { status: 201 })
   } catch (error) {
     console.error('Error creating product:', error)
+    // Prisma unique constraint error (P2002)
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      const target = (error.meta as any)?.target
+      const fields = Array.isArray(target) ? target.join(', ') : target
+      return NextResponse.json({ error: `Unique constraint failed on the fields: (${fields})` }, { status: 409 })
+    }
+
     const message = error instanceof Error ? error.message : 'Failed to create product'
     return NextResponse.json({ error: message }, { status: 500 })
   }
