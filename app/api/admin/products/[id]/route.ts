@@ -66,27 +66,103 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
       throw err
     }
 
-    // 🔥 VARIANTS RESET (only if provided)
+    // 🔥 VARIANTS UPSERT (preserve IDs used in orders)
+    // Use upsert per-variant instead of deleting all variants. For variants
+    // omitted from the payload we attempt to delete them; if deletion fails
+    // due to FK constraints, return a friendly error advising to deactivate.
     if (Object.prototype.hasOwnProperty.call(body, 'variants')) {
-      await prisma.productVariant.deleteMany({ where: { productId: id } })
       const variants = body.variants
-      if (Array.isArray(variants) && variants.length > 0) {
+      if (Array.isArray(variants)) {
+        // Fetch existing variants for this product
+        const existing = await prisma.productVariant.findMany({ where: { productId: id } })
+        const toKeepOrCreate: string[] = [] // track skus/ids to keep
+
         for (let i = 0; i < variants.length; i++) {
           const v = variants[i]
+          // Prefer id for matching, fall back to sku
+          let where: any = undefined
+          if (v.id) where = { id: v.id }
+          else if (v.sku && v.sku.trim()) where = { sku: v.sku.trim() }
+
+          // Ensure we have a SKU to use for uniqueness
           let variantSku = v.sku && v.sku.trim() ? v.sku.trim() : `${id}-V${i}-${Math.floor(Math.random() * 10000)}`
-          while (await prisma.productVariant.findUnique({ where: { sku: variantSku } })) {
+          while (!v.id && await prisma.productVariant.findUnique({ where: { sku: variantSku } }) && !(where && where.sku === variantSku)) {
             variantSku = `${variantSku}-${Math.floor(Math.random() * 1000)}`
           }
-          await prisma.productVariant.create({
-            data: {
-              productId: id,
-              size: v.size,
-              color: v.color,
-              colorHex: v.colorHex,
-              stock: v.stock,
-              sku: variantSku
+
+          // Build upsert where clause: if we have id use that, otherwise use sku
+          const upsertWhere = where ?? { sku: variantSku }
+
+          try {
+            await prisma.productVariant.upsert({
+              where: upsertWhere,
+              update: {
+                size: v.size,
+                color: v.color,
+                colorHex: v.colorHex,
+                // Overwrite stock with provided value
+                stock: Number(v.stock ?? 0),
+                sku: variantSku,
+                productId: id
+              },
+              create: {
+                productId: id,
+                size: v.size,
+                color: v.color,
+                colorHex: v.colorHex,
+                stock: Number(v.stock ?? 0),
+                sku: variantSku
+              }
+            })
+          } catch (err: any) {
+            // If upsert fails due to unique constraint on SKU, generate a new SKU and retry once
+            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+              variantSku = `${variantSku}-${Math.floor(Math.random() * 1000)}`
+              await prisma.productVariant.upsert({
+                where: { sku: variantSku },
+                update: {
+                  size: v.size,
+                  color: v.color,
+                  colorHex: v.colorHex,
+                  stock: Number(v.stock ?? 0),
+                  sku: variantSku,
+                  productId: id
+                },
+                create: {
+                  productId: id,
+                  size: v.size,
+                  color: v.color,
+                  colorHex: v.colorHex,
+                  stock: Number(v.stock ?? 0),
+                  sku: variantSku
+                }
+              })
+            } else {
+              throw err
             }
-          })
+          }
+
+          // track by id if provided else sku
+          if (v.id) toKeepOrCreate.push(v.id)
+          else toKeepOrCreate.push(variantSku)
+        }
+
+        // Determine which existing variants were removed in payload
+        const existingIds = existing.map((e) => e.id)
+        const removed = existing.filter((e) => !toKeepOrCreate.includes(e.id) && !toKeepOrCreate.includes(e.sku))
+
+        if (removed.length > 0) {
+          try {
+            // Attempt to delete removed variants
+            await prisma.productVariant.deleteMany({ where: { id: { in: removed.map(r => r.id) } } })
+          } catch (err: any) {
+            // Foreign key constraint (orders referencing variant) will raise P2003
+            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+              // Inform client that deletion failed due to existing orders; advise deactivation
+              return NextResponse.json({ error: 'Some variants could not be deleted because they are referenced by existing orders. Mark them inactive instead.' }, { status: 400 })
+            }
+            throw err
+          }
         }
       }
     }
