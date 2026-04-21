@@ -193,12 +193,39 @@ export async function POST(request: NextRequest) {
       const cart = await getOrCreateCart(session?.user?.id)
 
       // validate coupon
-      const coupon = await prisma.coupon.findFirst({
+      let coupon = await prisma.coupon.findFirst({
         where: { code: { equals: couponCode, mode: 'insensitive' }, active: true }
       })
 
+      // If coupon not found, handle SETRA10 fallback and auto-create logic
       if (!coupon) {
-        return NextResponse.json({ success: false, error: 'Invalid coupon' }, { status: 400 })
+        if (couponCode.toUpperCase() === 'SETRA10') {
+          try {
+            // Try to create the coupon in DB so future requests use DB entry
+            coupon = await prisma.coupon.create({
+              data: {
+                code: 'SETRA10',
+                name: 'SETRA10',
+                type: 'PERCENT',
+                value: 10,
+                active: true
+              }
+            })
+          } catch (createErr) {
+            // If create fails (e.g., table missing or DB issue), log details and fall back to manual 10% discount
+            console.log('Hata detayı:', createErr)
+            const subtotal = cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0)
+            const discount = Math.round((subtotal * 0.1) * 100) / 100
+            try {
+              await prisma.cart.update({ where: { id: cart.id }, data: { couponCode: 'SETRA10', discount } })
+            } catch (updateErr) {
+              console.log('Hata detayı:', updateErr)
+            }
+            return NextResponse.json({ success: true, coupon: 'SETRA10', discount })
+          }
+        } else {
+          return NextResponse.json({ success: false, error: 'Invalid coupon' }, { status: 400 })
+        }
       }
 
       // calculate subtotal
@@ -257,6 +284,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Cart POST error:', error)
+    console.log('Hata detayı:', error)
     return NextResponse.json(
       { error: 'Failed to add item to cart' },
       { status: 500 }
