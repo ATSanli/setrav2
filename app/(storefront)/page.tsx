@@ -126,12 +126,13 @@ export default function HomePage() {
           style={{ scale: heroScale }}
         >
           <Image
-            src="/images/hero-main.jpg"
+            src="/images/hero-main.gif"
             alt="SETRA Collection"
             fill
             className="object-cover"
             priority
             quality={90}
+            unoptimized
           />
         </motion.div>
         

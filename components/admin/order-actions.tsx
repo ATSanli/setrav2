@@ -27,7 +27,7 @@ export default function OrderActions({ id, status }: { id: string, status?: stri
       if (!res.ok) {
         toast({ title: 'Update failed', description: j.error || 'Failed to update order' })
       } else {
-        toast({ title: 'Updated', description: 'Order status updated' })
+        toast({ title: 'Updated', description: j.message || 'Order status updated' })
         router.refresh()
       }
     } catch (err) {
@@ -47,7 +47,7 @@ export default function OrderActions({ id, status }: { id: string, status?: stri
       if (!res.ok) {
         toast({ title: 'Cancel failed', description: j.error || '' })
       } else {
-        toast({ title: 'Cancelled', description: 'Order cancelled' })
+        toast({ title: j.message ? 'Cancelled' : 'Cancelled', description: j.message || 'Order cancelled' })
         router.refresh()
       }
     } catch (err) {
