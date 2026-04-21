@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 const navigation = [
   { name: translations.tr.dashboard, href: '/admin', icon: LayoutDashboard },
   { name: translations.tr.products || 'Ürünler', href: '/admin/urunler', icon: Package },
+  { name: translations.tr.newsletter_title || 'Bülten', href: '/admin/newsletter', icon: MessageSquare },
   { name: translations.tr.categories || 'Kategoriler', href: '/admin/kategoriler', icon: FolderTree },
   { name: translations.tr.orders || 'Siparişler', href: '/admin/siparisler', icon: ShoppingCart },
   { name: translations.tr.customers || 'Müşteriler', href: '/admin/musteriler', icon: Users },

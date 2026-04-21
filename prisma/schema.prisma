@@ -7,6 +7,11 @@ datasource db {
   // points to the production Postgres-compatible database.
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // When running migrations, Prisma creates a temporary shadow database to
+  // compare schemas. For managed Postgres providers (Neon) it's safer to
+  // provide a dedicated shadow database and set its URL in `SHADOW_DATABASE_URL`.
+  // See .env for instructions.
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 // Enums removed for SQLite compatibility; use string values for roles and statuses in SQLite dev

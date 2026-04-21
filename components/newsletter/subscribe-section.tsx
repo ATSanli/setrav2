@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useT } from '@/components/providers/language-provider'
+import { useToast } from '@/components/ui/use-toast'
 
 export default function SubscribeSection({ variant = 'section1' }: { variant?: 'section1' | 'section2' }) {
   const t = useT()
@@ -9,6 +10,7 @@ export default function SubscribeSection({ variant = 'section1' }: { variant?: '
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -31,6 +33,11 @@ export default function SubscribeSection({ variant = 'section1' }: { variant?: '
       if (res.ok && data.success) {
         setMessage(t('newsletter.messages.success'))
         setEmail('')
+        // show toast with discount code
+        toast({
+          title: 'Tebrikler!',
+          description: `%10 indirim kodunuz: ${data.discountCode ?? 'WELCOME10'}`,
+        })
       } else {
         setError(data.error || t('newsletter.messages.exists'))
       }
@@ -43,17 +50,17 @@ export default function SubscribeSection({ variant = 'section1' }: { variant?: '
 
   if (variant === 'section2') {
     return (
-      <div className="newsletter-section-2">
+      <div className="newsletter-section-2 flex flex-col items-center text-center">
         <h3 className="text-xl font-medium">{t('newsletter.section2.title')}</h3>
         <p className="text-sm mb-4">{t('newsletter.section2.text')}</p>
-        <form onSubmit={onSubmit} className="flex gap-2 max-w-md">
+        <form onSubmit={onSubmit} className="flex gap-2 w-full max-w-md">
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('newsletter.section2.placeholder') || t('newsletter.section1.placeholder')}
-            className="flex-1 px-3 py-2 border rounded"
+            className="flex-1 px-4 py-3 border rounded bg-white/5"
           />
-          <button type="submit" className="px-4 py-2 bg-black text-white rounded">
+          <button type="submit" className="px-4 py-2 bg-primary-foreground text-primary rounded">
             {loading ? '...' : t('newsletter.section2.button')}
           </button>
         </form>
@@ -64,16 +71,16 @@ export default function SubscribeSection({ variant = 'section1' }: { variant?: '
   }
 
   return (
-    <div className="newsletter-section-1">
+    <div className="newsletter-section-1 flex flex-col items-center text-center">
       <h3 className="font-serif text-2xl mb-2">{t('newsletter.section1.title')}</h3>
       <p className="text-lg font-semibold mb-1">{t('newsletter.section1.subtitle')}</p>
       <p className="text-sm mb-4">{t('newsletter.section1.text')}</p>
-      <form onSubmit={onSubmit} className="flex gap-2 max-w-md">
+      <form onSubmit={onSubmit} className="flex gap-2 w-full max-w-md">
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('newsletter.section1.placeholder')}
-          className="flex-1 px-3 py-3 border rounded bg-white/5"
+          className="flex-1 px-4 py-3 border rounded bg-white/5"
         />
         <button type="submit" className="px-6 py-3 bg-primary-foreground text-primary rounded">
           {loading ? '...' : t('newsletter.section1.button')}
