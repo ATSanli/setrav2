@@ -351,13 +351,13 @@ export default function HomePage() {
                 New Season
               </span>
               <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight">
-                The Art of 
-                <span className="italic"> Modest</span>
-                <br />Elegance
+                Zerafetin 
+                <span className="italic"> Mütevazı</span>
+                <br />Sanat ile Buluşması
               </h2>
               <p className="text-primary-foreground/80 text-lg mb-10 leading-relaxed">
-                Discover our latest collection where timeless sophistication meets contemporary design. 
-                Each piece is crafted with premium fabrics and meticulous attention to detail.
+                Zamansız zarafetin çağdaş tasarımla buluştuğu en yeni koleksiyonumuzu keşfedin.
+Her parça, birinci sınıf kumaşlar ve titiz bir detaycılıkla üretilmiştir.
               </p>
               <Button 
                 size="lg" 
@@ -366,7 +366,7 @@ export default function HomePage() {
                 className="rounded-none px-10 py-6 text-sm uppercase tracking-[0.2em] font-medium"
               >
                 <Link href="/yeni-gelenler">
-                  Explore Collection
+                  Koleksiyonu Keşfedin
                   <ArrowRight className="ml-3 h-4 w-4" />
                 </Link>
               </Button>
