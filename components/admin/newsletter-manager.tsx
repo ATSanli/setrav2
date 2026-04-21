@@ -1,6 +1,7 @@
  'use client'
 
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 type Subscriber = {
   id: string
@@ -44,8 +45,20 @@ export default function NewsletterManager() {
 
   const onDelete = async (id: string) => {
     if (!confirm('Delete subscriber?')) return
-    await fetch(`/api/admin/newsletter/${id}`, { method: 'DELETE' })
-    fetchList(q, page)
+    try {
+      const res = await fetch(`/api/admin/newsletter/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        toast.success('Subscriber deleted')
+        fetchList(q, page)
+      } else {
+        toast.error(data?.error || 'Delete failed')
+        if (res.status === 404) fetchList(q, page)
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Delete failed')
+    }
   }
 
   const onExport = () => {
