@@ -44,35 +44,63 @@ function OrderStatusBadge({ status }: { status: string }) {
 
 async function getOrders() {
   try {
+    // Match the dashboard's working query: only include basic user and items info
     const orders = await prisma.order.findMany({
+      take: 0, // will be overridden if we want all; keep as example of minimal query
+      orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { name: true, email: true } },
-        items: {
-          include: {
-            product: { select: { id: true, name: true } }
-          }
-        },
-        address: true
-      },
-      orderBy: { createdAt: 'desc' }
+        user: { select: { firstName: true, lastName: true, email: true } },
+        items: { select: { quantity: true } }
+      }
     })
 
-    // Sanitize results: defaults for missing fields and safe product fallback
-    const sanitized = (orders as any[]).map((order) => ({
+    // If above succeeded (it should), fetch all orders with same include (no deep product relations)
+    const full = await prisma.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { firstName: true, lastName: true, email: true } },
+        items: { select: { quantity: true } },
+        address: true
+      }
+    })
+
+    const sanitized = (full as any[]).map((order) => ({
       ...order,
       discount: order.discount ?? 0,
       couponCode: 'couponCode' in order ? order.couponCode ?? null : null,
       createdAtString: order.createdAt instanceof Date ? order.createdAt.toISOString() : String(order.createdAt),
-      items: (order.items || []).map((it: any) => ({
-        ...it,
-        product: it.product ?? { id: null, name: translations.tr.deleted_product ?? 'Deleted product' }
-      }))
     }))
 
     return { orders: sanitized, error: null }
   } catch (error) {
-    console.error('Admin getOrders error:', error)
-    return { orders: [], error: (error as Error)?.message ?? 'Unknown error' }
+    console.error('Admin getOrders error (full):', error)
+
+    // Fallback: minimal fetch to avoid relation-caused crashes
+    try {
+      const minimal = await prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          total: true,
+          createdAt: true,
+          user: { select: { firstName: true, lastName: true, email: true } },
+          _count: { select: { items: true } }
+        }
+      })
+
+      const mapped = minimal.map((o: any) => ({
+        ...o,
+        items: Array.from({ length: o._count?.items ?? 0 }).map(() => ({ quantity: 1 })),
+        createdAtString: o.createdAt instanceof Date ? o.createdAt.toISOString() : String(o.createdAt)
+      }))
+
+      return { orders: mapped, error: null }
+    } catch (err) {
+      console.error('Admin getOrders error (fallback minimal):', err)
+      return { orders: [], error: (err as Error)?.message ?? 'Unknown error' }
+    }
   }
 }
 
@@ -135,7 +163,12 @@ async function OrdersTable() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{order.user?.name || 'Guest'}</p>
+                      <p className="font-medium">{
+                        (((order.user?.firstName ?? '') + ' ' + (order.user?.lastName ?? '')).trim())
+                        || order.user?.email
+                        || translations.tr.guest_user
+                        || 'Misafir Kullanıcı'
+                      }</p>
                       <p className="text-sm text-muted-foreground">
                         {order.user?.email || order.guestEmail || '-'}
                       </p>
@@ -143,7 +176,7 @@ async function OrdersTable() {
                   </TableCell>
                   <TableCell>
                     <p className="text-sm">
-                      {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      {(order.items?.length ?? 0)} item{(order.items?.length ?? 0) !== 1 ? 's' : ''}
                     </p>
                   </TableCell>
                   <TableCell>
