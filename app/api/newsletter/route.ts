@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: t.success,
-      discountCode: 'WELCOME10'
+      discountCode: 'SETRA10'
     })
 
   } catch (error) {
