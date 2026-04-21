@@ -189,6 +189,12 @@ export const translations = {
     // Footer
     newsletter_title: 'Bültenimize Katılın',
     newsletter_sub: 'Yeni koleksiyonlar ve özel fırsatlardan haberdar olun',
+    // Instagram
+    instagram: {
+      title: 'Bizi Takip Edin',
+      subtitle: '@setraofficialtr ile tarzını keşfet',
+      follow_more: 'Daha fazlası için Instagram\'da takip et',
+    },
     new_collection: 'Yeni Koleksiyon',
     no_new_products: 'Henüz yeni ürün eklenmedi.',
     // Product detail
@@ -422,6 +428,12 @@ export const translations = {
     // Footer
     newsletter_title: 'Join Our Newsletter',
     newsletter_sub: 'Be the first to know about new collections and exclusive offers',
+    // Instagram
+    instagram: {
+      title: 'Follow Us',
+      subtitle: 'Discover your style with @setraofficialtr',
+      follow_more: 'Follow us on Instagram for more',
+    },
     new_collection: 'New Collection',
     no_new_products: 'No new products yet.',
     // Product detail

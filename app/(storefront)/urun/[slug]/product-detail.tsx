@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Heart, Minus, Plus, Star, Truck, RotateCcw, Shield } from 'lucide-react'
+import { ChevronRight, Heart, Minus, Plus, Star, Truck, RotateCcw, Shield, Instagram } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -383,6 +383,22 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               ) : (
                 <p className="text-muted-foreground">{t('product_description_missing')}</p>
               )}
+              {/* Instagram follow callout */}
+              <section className="border-t bg-background">
+                <div className="container mx-auto px-4 py-8">
+                  <div className="flex items-center justify-center gap-4">
+                    <Instagram className="h-6 w-6 text-muted-foreground" />
+                    <a
+                      href="https://instagram.com/setraofficialtr"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {t('instagram.follow_more')}
+                    </a>
+                  </div>
+                </div>
+              </section>
             </TabsContent>
             <TabsContent value="reviews" className="pt-6">
               {product.reviews.length > 0 ? (

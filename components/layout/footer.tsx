@@ -148,13 +148,14 @@ export function Footer() {
               </Link>
               <div className="flex items-center gap-4">
                 <a
-                  href="https://instagram.com"
+                  href="https://instagram.com/setraofficialtr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors flex items-center gap-2"
                 >
                   <Instagram className="h-5 w-5" />
-                  <span className="sr-only">Instagram</span>
+                  <span className="sr-only">Instagram @setraofficialtr</span>
+                  <span className="hidden sm:inline ml-2 text-sm">@setraofficialtr</span>
                 </a>
                 <a
                   href="https://facebook.com"

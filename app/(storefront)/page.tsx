@@ -125,6 +125,9 @@ export default function HomePage() {
           className="relative z-10 h-full flex items-center justify-center text-center px-4"
           style={{ opacity: heroOpacity, y: heroY }}
         >
+          <div className="absolute top-8 right-8 text-white/70 text-sm">
+            <a href="https://instagram.com/setraofficialtr" target="_blank" rel="noopener noreferrer" className="hover:underline">@setraofficialtr</a>
+          </div>
           <div className="max-w-4xl">
             <motion.span 
               initial={{ opacity: 0, y: 20 }}
@@ -264,7 +267,7 @@ export default function HomePage() {
               </div>
               <Button variant="ghost" asChild className="hidden md:flex group">
                 <Link href="/urunler?sort=bestseller" className="text-sm uppercase tracking-widest">
-                  View All
+                  Hepsini Gör
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
@@ -378,10 +381,10 @@ export default function HomePage() {
           <AnimatedSection>
             <div className="text-center mb-16">
               <span className="text-sm uppercase tracking-[0.3em] text-accent font-medium mb-4 block">
-                Just Arrived
+                Şimdi Trend Olanlar
               </span>
               <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight">
-                New Arrivals
+                Yeni Gelenler
               </h2>
             </div>
           </AnimatedSection>
@@ -432,7 +435,7 @@ export default function HomePage() {
               className="rounded-none px-10 py-6 text-sm uppercase tracking-[0.2em] border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
             >
               <Link href="/yeni-gelenler">
-                View All New Arrivals
+                Tüm Yeni Gelenler
                 <ArrowRight className="ml-3 h-4 w-4" />
               </Link>
             </Button>
@@ -473,8 +476,8 @@ export default function HomePage() {
           <AnimatedSection>
             <div className="text-center mb-12">
               <Instagram className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="font-serif text-3xl md:text-4xl mb-2">@setra.official</h2>
-              <p className="text-muted-foreground">Follow us for daily inspiration</p>
+              <h2 className="font-serif text-3xl md:text-4xl mb-2">{t('setraofficialtr')}</h2>
+              <p className="text-muted-foreground">{t('@setraofficialtr')}</p>
             </div>
           </AnimatedSection>
 
@@ -488,7 +491,7 @@ export default function HomePage() {
             {instagramImages.map((img, i) => (
               <motion.a
                 key={i}
-                href="https://instagram.com/setra.official"
+                href="https://instagram.com/setraofficialtr"
                 target="_blank"
                 rel="noopener noreferrer"
                 variants={scaleIn}
@@ -514,13 +517,13 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <AnimatedSection className="max-w-2xl mx-auto text-center">
             <span className="text-sm uppercase tracking-[0.3em] text-primary-foreground/70 mb-4 block">
-              Newsletter
+              Bülten
             </span>
             <h2 className="font-serif text-4xl md:text-5xl mb-4">
-              Get 10% Off
+              %10 İndirimle Başlayın
             </h2>
             <p className="text-primary-foreground/80 text-lg mb-10">
-              {"Subscribe to our newsletter and get 10% off your first order."}
+              {"Takip ederek 10% indirim kazanın."}
             </p>
             
             <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
@@ -534,12 +537,12 @@ export default function HomePage() {
                 variant="secondary"
                 className="rounded-none h-14 px-8 text-sm uppercase tracking-widest"
               >
-                Subscribe
+                Takibe Al
               </Button>
             </form>
             
             <p className="text-primary-foreground/50 text-sm mt-6">
-              By subscribing, you agree to our Privacy Policy.
+              Takip ederek gizlilik politikamızı kabul etmiş olursunuz.
             </p>
           </AnimatedSection>
         </div>
