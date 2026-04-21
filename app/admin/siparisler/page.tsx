@@ -22,6 +22,7 @@ import {
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
 import { translations } from '@/translations'
+import OrderActions from '@/components/admin/order-actions'
 
 function OrderStatusBadge({ status }: { status: string }) {
   const statusConfig: Record<string, { label: string, className: string }> = {
@@ -159,43 +160,51 @@ async function OrdersTable() {
               {orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell>
-                    <p className="font-medium">{order.orderNumber}</p>
+                    <Link href={`/admin/siparisler/${order.id}`} className="block">
+                      <p className="font-medium">{order.orderNumber}</p>
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <p className="font-medium">{
-                        (((order.user?.firstName ?? '') + ' ' + (order.user?.lastName ?? '')).trim())
-                        || order.user?.email
-                        || translations.tr.guest_user
-                        || 'Misafir Kullanıcı'
-                      }</p>
-                      <p className="text-sm text-muted-foreground">
-                        {order.user?.email || order.guestEmail || '-'}
+                    <Link href={`/admin/siparisler/${order.id}`} className="block">
+                      <div>
+                        <p className="font-medium">{
+                          (((order.user?.firstName ?? '') + ' ' + (order.user?.lastName ?? '')).trim())
+                          || order.user?.email
+                          || translations.tr.guest_user
+                          || 'Misafir Kullanıcı'
+                        }</p>
+                        <p className="text-sm text-muted-foreground">
+                          {order.user?.email || order.guestEmail || '-'}
+                        </p>
+                      </div>
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Link href={`/admin/siparisler/${order.id}`} className="block">
+                      <p className="text-sm">
+                        {(order.items?.length ?? 0)} item{(order.items?.length ?? 0) !== 1 ? 's' : ''}
                       </p>
-                    </div>
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <p className="text-sm">
-                      {(order.items?.length ?? 0)} item{(order.items?.length ?? 0) !== 1 ? 's' : ''}
-                    </p>
+                    <Link href={`/admin/siparisler/${order.id}`} className="block">
+                      <p className="font-medium">{formatPrice(Number(order.total))}</p>
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <p className="font-medium">{formatPrice(Number(order.total))}</p>
+                    <Link href={`/admin/siparisler/${order.id}`} className="block">
+                      <OrderStatusBadge status={order.status} />
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <OrderStatusBadge status={order.status} />
+                    <Link href={`/admin/siparisler/${order.id}`} className="block">
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(order.createdAtString ?? order.createdAt).toLocaleDateString('tr-TR')}
+                      </p>
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(order.createdAtString ?? order.createdAt).toLocaleDateString('tr-TR')}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/siparisler/${order.id}`}>
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <OrderActions id={order.id} status={order.status} />
                   </TableCell>
                 </TableRow>
               ))}
