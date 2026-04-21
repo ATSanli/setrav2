@@ -169,7 +169,24 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json(orders)
+    // Sanitize and format orders to avoid hydration/serialization issues and
+    // to be resilient to missing related records (deleted products, null fields)
+    const sanitized = (orders as any[]).map((order) => ({
+      ...order,
+      // ensure numeric defaults
+      discount: order.discount ?? 0,
+      // couponCode might be a newly added optional field; default to null if absent
+      couponCode: 'couponCode' in order ? order.couponCode ?? null : null,
+      // send ISO strings to avoid Date serialization/hydration problems on client
+      createdAt: order.createdAt instanceof Date ? order.createdAt.toISOString() : order.createdAt,
+      updatedAt: order.updatedAt instanceof Date ? order.updatedAt.toISOString() : order.updatedAt,
+      items: (order.items || []).map((item: any) => ({
+        ...item,
+        product: item.product ?? { id: null, name: 'Deleted product', images: [] }
+      }))
+    }))
+
+    return NextResponse.json(sanitized)
   } catch (error) {
     console.error('Orders GET error:', error)
     return NextResponse.json(

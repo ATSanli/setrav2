@@ -49,21 +49,35 @@ async function getOrders() {
         user: { select: { name: true, email: true } },
         items: {
           include: {
-            product: { select: { name: true } }
+            product: { select: { id: true, name: true } }
           }
         },
         address: true
       },
       orderBy: { createdAt: 'desc' }
     })
-    return orders
-  } catch {
-    return []
+
+    // Sanitize results: defaults for missing fields and safe product fallback
+    const sanitized = (orders as any[]).map((order) => ({
+      ...order,
+      discount: order.discount ?? 0,
+      couponCode: 'couponCode' in order ? order.couponCode ?? null : null,
+      createdAtString: order.createdAt instanceof Date ? order.createdAt.toISOString() : String(order.createdAt),
+      items: (order.items || []).map((it: any) => ({
+        ...it,
+        product: it.product ?? { id: null, name: translations.tr.deleted_product ?? 'Deleted product' }
+      }))
+    }))
+
+    return { orders: sanitized, error: null }
+  } catch (error) {
+    console.error('Admin getOrders error:', error)
+    return { orders: [], error: (error as Error)?.message ?? 'Unknown error' }
   }
 }
 
 async function OrdersTable() {
-  const orders = await getOrders()
+  const { orders, error } = await getOrders()
 
   return (
     <Card>
@@ -96,7 +110,11 @@ async function OrdersTable() {
         </div>
       </CardHeader>
       <CardContent>
-        {orders.length > 0 ? (
+        {error ? (
+          <div className="text-center py-12">
+            <p className="text-destructive">{translations.tr.orders_fetch_failed ?? 'Siparişler yüklenirken hata oluştu'}</p>
+          </div>
+        ) : orders.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -136,7 +154,7 @@ async function OrdersTable() {
                   </TableCell>
                   <TableCell>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(order.createdAt).toLocaleDateString('tr-TR')}
+                      {new Date(order.createdAtString ?? order.createdAt).toLocaleDateString('tr-TR')}
                     </p>
                   </TableCell>
                   <TableCell>
