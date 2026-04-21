@@ -1,12 +1,24 @@
 'use client'
 
-import { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { ArrowRight, Truck, Shield, RotateCcw, Instagram, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog'
+import { Button as UiButton } from '@/components/ui/button'
 import { ProductCard } from '@/components/product-card'
 import { useT } from '@/components/providers/language-provider'
 import useSWR from 'swr'
@@ -80,6 +92,12 @@ function AnimatedSection({ children, className = '' }: { children: React.ReactNo
 
 export default function HomePage() {
   const t = useT()
+  const { toast } = useToast()
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [nlLoading, setNlLoading] = useState(false)
+  const [nlError, setNlError] = useState('')
+  const [showCodeModal, setShowCodeModal] = useState(false)
+  const [discountCode, setDiscountCode] = useState<string | null>(null)
   const { data: productsData } = useSWR('/api/products?featured=true&limit=8', fetcher)
   const { data: newProductsData } = useSWR('/api/products?new=true&limit=4', fetcher)
   const { data: bestsellerData } = useSWR('/api/products?bestseller=true&limit=8', fetcher)
@@ -197,6 +215,7 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
       </section>
+
 
       {/* Category Showcase - Interactive Cards */}
       <section className="py-24 lg:py-32 bg-background">
@@ -512,37 +531,96 @@ Her parça, birinci sınıf kumaşlar ve titiz bir detaycılıkla üretilmiştir
         </div>
       </section>
 
+      
       {/* Newsletter Section */}
       <section className="py-24 lg:py-32 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4">
           <AnimatedSection className="max-w-2xl mx-auto text-center">
             <span className="text-sm uppercase tracking-[0.3em] text-primary-foreground/70 mb-4 block">
-              Bülten
+              {t('newsletter.section1.title')}
             </span>
             <h2 className="font-serif text-4xl md:text-5xl mb-4">
-              %10 İndirimle Başlayın
+              {t('newsletter.section1.subtitle')}
             </h2>
             <p className="text-primary-foreground/80 text-lg mb-10">
-              {"Takip ederek 10% indirim kazanın."}
+              {t('newsletter.section1.text')}
             </p>
-            
-            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              setNlError('')
+              if (!newsletterEmail.trim()) { setNlError(t('newsletter.messages.required') || 'E-posta gereklidir'); return }
+              setNlLoading(true)
+              try {
+                const res = await fetch('/api/newsletter', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: newsletterEmail, lang: localStorage.getItem('language') || 'tr' })
+                })
+                const data = await res.json()
+                if (res.ok && data.success) {
+                  setDiscountCode(data.discountCode ?? 'SETRA10')
+                  setShowCodeModal(true)
+                  setNewsletterEmail('')
+                } else {
+                  setNlError(data.error || t('newsletter.messages.exists'))
+                }
+              } catch (err) {
+                setNlError(t('newsletter.messages.invalid_email'))
+              } finally {
+                setNlLoading(false)
+              }
+            }} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <Input
                 type="email"
-                placeholder="E-posta adresiniz"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail((e.target as HTMLInputElement).value)}
+                placeholder={t('newsletter.section1.placeholder')}
                 className="flex-1 bg-transparent border-primary-foreground/30 text-primary-foreground placeholder:text-primary-foreground/50 rounded-none h-14 focus:border-primary-foreground"
               />
-              <Button 
+              <Button
                 type="submit"
                 variant="secondary"
                 className="rounded-none h-14 px-8 text-sm uppercase tracking-widest"
+                disabled={nlLoading}
               >
-                Takibe Al
+                {nlLoading ? '...' : t('newsletter.section1.button')}
               </Button>
             </form>
-            
+
+                  {nlError && <p className="text-destructive text-sm mt-4">{nlError}</p>}
+
+                  {/* Discount code modal */}
+                  <Dialog open={showCodeModal} onOpenChange={(v) => setShowCodeModal(v)}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Tebrikler!</DialogTitle>
+                        <DialogDescription>İndirim kodunuz hazır.</DialogDescription>
+                      </DialogHeader>
+                      <div className="mt-4 text-center">
+                        <div className="inline-flex items-center gap-4 bg-primary-foreground/5 border border-primary-foreground/10 rounded-md px-4 py-3">
+                          <span className="font-mono font-semibold text-lg">{discountCode}</span>
+                          <button
+                            className="ml-2 px-3 py-1 bg-primary-foreground text-primary rounded"
+                            onClick={async () => {
+                              if (!discountCode) return
+                              await navigator.clipboard.writeText(discountCode)
+                              // show quick toast
+                              toast({ title: 'Kopyalandı', description: `${discountCode} kopyalandı` })
+                            }}
+                          >
+                            Kopyala
+                          </button>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <UiButton onClick={() => setShowCodeModal(false)}>Kapat</UiButton>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
             <p className="text-primary-foreground/50 text-sm mt-6">
-              Takip ederek gizlilik politikamızı kabul etmiş olursunuz.
+              {t('newsletter.section1.note')}
             </p>
           </AnimatedSection>
         </div>

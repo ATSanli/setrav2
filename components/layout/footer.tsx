@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { Instagram, Facebook, Twitter } from 'lucide-react'
 import { useT } from '@/components/providers/language-provider'
-import SubscribeSection from '@/components/newsletter/subscribe-section'
 
 const footerLinks = {
   shop: [
@@ -39,11 +38,12 @@ export function Footer() {
 
   return (
     <footer className="bg-primary text-primary-foreground">
-      {/* Newsletter */}
+      {/* Newsletter CTA (link to homepage newsletter section) */}
       <div className="border-b border-primary-foreground/10">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-8">
           <div className="max-w-xl mx-auto text-center">
-            <SubscribeSection variant="section1" />
+            <h3 className="font-medium text-lg mb-2">{t('newsletter_title')}</h3>
+            <p className="text-primary-foreground/70">{t('newsletter_sub')}</p>
           </div>
         </div>
       </div>

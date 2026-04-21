@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -16,7 +16,7 @@ const FREE_SHIPPING_THRESHOLD = 500
 
 export function CartContent() {
   const router = useRouter()
-  const { items, subtotal, isLoading, updateQuantity, removeItem, clearCart } = useCart()
+  const { items, subtotal, isLoading, updateQuantity, removeItem, clearCart, mutate, couponCode: serverCouponCode, discount: serverDiscount } = useCart()
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
   const t = useT()
 
@@ -46,6 +46,41 @@ export function CartContent() {
   const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 29.90
   const total = subtotal + shippingCost
   const remainingForFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal
+  const [coupon, setCoupon] = useState('')
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null)
+  const [discountAmount, setDiscountAmount] = useState(0)
+
+  // sync with server persisted coupon on load/changes
+  useEffect(() => {
+    if (serverCouponCode) setAppliedCoupon(serverCouponCode)
+    if (serverDiscount) setDiscountAmount(Number(serverDiscount))
+  }, [serverCouponCode, serverDiscount])
+
+  const applyCoupon = async () => {
+    if (!coupon) return toast.error('Kupon kodu giriniz')
+    try {
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ couponCode: coupon.trim() })
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setDiscountAmount(data.discount || 0)
+        setAppliedCoupon(data.coupon || coupon.trim().toUpperCase())
+        toast.success('İndirim uygulandı')
+        // refresh cart totals from server
+        if (mutate) mutate()
+      } else {
+        toast.error(data.error || 'Geçersiz kupon')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Kupon uygulanamadı')
+    }
+  }
+
+  const totalAfterDiscount = Math.max(0, total - discountAmount)
 
   if (isLoading) {
     return (
@@ -194,9 +229,32 @@ export function CartContent() {
 
           <Separator className="my-4" />
 
-          <div className="flex justify-between font-medium text-lg mb-6">
-            <span>{t('total')}</span>
-            <span>{formatPrice(total)}</span>
+          {/* Coupon Input */}
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-2 block">İndirim Kodu</label>
+            <div className="flex gap-2">
+              <input value={coupon} onChange={(e) => setCoupon(e.target.value)} placeholder="Kupon kodu" className="flex-1 px-3 py-2 border" />
+              <button onClick={applyCoupon} className="px-4 py-2 bg-primary-foreground text-primary">Uygula</button>
+            </div>
+            {appliedCoupon && (
+              <p className="text-sm text-success mt-2">İndirim uygulandı: -{formatPrice(discountAmount)}</p>
+            )}
+          </div>
+
+          <Separator className="my-4" />
+
+          <div className="flex flex-col gap-2 font-medium text-lg mb-6">
+            <div className="flex justify-between">
+              <span>{t('total')}</span>
+              {!appliedCoupon ? (
+                <span>{formatPrice(total)}</span>
+              ) : (
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground line-through">{formatPrice(total)}</div>
+                  <div className="text-lg font-semibold">{formatPrice(totalAfterDiscount)}</div>
+                </div>
+              )}
+            </div>
           </div>
 
           <Button className="w-full h-12" size="lg" asChild>

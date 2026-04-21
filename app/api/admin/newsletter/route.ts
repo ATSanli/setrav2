@@ -5,14 +5,22 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url)
     const q = url.searchParams.get('q')
+    const page = Number(url.searchParams.get('page') || '1')
+    const pageSize = Number(url.searchParams.get('pageSize') || '20')
 
-    const where = q
-      ? { where: { email: { contains: q, mode: 'insensitive' } }, orderBy: { createdAt: 'desc' } }
-      : { orderBy: { createdAt: 'desc' } }
+    const where = q ? { email: { contains: q, mode: 'insensitive' } } : {}
 
-    const subscribers = await prisma.newsletterSubscriber.findMany(where as any)
+    const [total, subscribers] = await Promise.all([
+      prisma.newsletterSubscriber.count({ where }),
+      prisma.newsletterSubscriber.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (Math.max(1, page) - 1) * pageSize,
+        take: pageSize
+      })
+    ])
 
-    return NextResponse.json({ success: true, subscribers })
+    return NextResponse.json({ success: true, subscribers, total, page, pageSize })
   } catch (error) {
     console.error('Admin newsletter list error:', error)
     return NextResponse.json({ success: false, error: 'failed' }, { status: 500 })

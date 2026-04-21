@@ -172,8 +172,10 @@ export async function GET() {
 
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
+    const couponCode = cart.couponCode || null
+    const discount = Number(cart.discount ?? 0)
 
-    return NextResponse.json({ items, subtotal, itemCount })
+    return NextResponse.json({ items, subtotal, itemCount, couponCode, discount })
   } catch (error) {
     console.error('Cart GET error:', error)
     return NextResponse.json({ items: [], subtotal: 0, itemCount: 0 })
@@ -183,7 +185,37 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    const { productId, variantId, quantity = 1 } = await request.json()
+    const body = await request.json()
+
+    // If body contains couponCode, apply coupon to cart
+    if (body?.couponCode) {
+      const couponCode = String(body.couponCode).trim()
+      const cart = await getOrCreateCart(session?.user?.id)
+
+      // validate coupon
+      const coupon = await prisma.coupon.findFirst({
+        where: { code: { equals: couponCode, mode: 'insensitive' }, active: true }
+      })
+
+      if (!coupon) {
+        return NextResponse.json({ success: false, error: 'Invalid coupon' }, { status: 400 })
+      }
+
+      // calculate subtotal
+      const subtotal = cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0)
+      let discount = 0
+      if (coupon.type === 'PERCENT') {
+        discount = Math.round((subtotal * (coupon.value / 100)) * 100) / 100
+      } else {
+        discount = coupon.value
+      }
+
+      await prisma.cart.update({ where: { id: cart.id }, data: { couponCode: coupon.code, discount } })
+
+      return NextResponse.json({ success: true, coupon: coupon.code, discount })
+    }
+
+    const { productId, variantId, quantity = 1 } = body
 
     if (!productId || !variantId) {
       return NextResponse.json(

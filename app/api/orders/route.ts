@@ -76,7 +76,9 @@ export async function POST(request: NextRequest) {
       0
     )
     const shippingCost = subtotal >= 500 ? 0 : 29.90
-    const total = subtotal + shippingCost
+    // Apply any cart-level discount (server-side coupon)
+    const discount = Number(cart.discount ?? 0)
+    const total = Math.max(0, subtotal + shippingCost - discount)
 
     // Create order with items in a transaction
     const order = await prisma.$transaction(async (tx) => {
@@ -88,6 +90,7 @@ export async function POST(request: NextRequest) {
           addressId,
           subtotal,
           shippingCost,
+          discount,
           total,
           note,
           items: {
@@ -117,6 +120,9 @@ export async function POST(request: NextRequest) {
       await tx.cartItem.deleteMany({
         where: { cartId: cart.id }
       })
+
+      // Reset cart coupon and discount
+      await tx.cart.update({ where: { id: cart.id }, data: { couponCode: null, discount: 0 } })
 
       return newOrder
     })

@@ -169,6 +169,8 @@ model Cart {
   id            String    @id @default(cuid())
   userId        String?   @unique
   sessionId     String?   @unique
+  couponCode    String? 
+  discount      Float     @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -292,6 +294,17 @@ model Permission {
   users UserPermission[]
 
   @@map("permissions")
+}
+
+model Coupon {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  type      String   @default("PERCENT") // e.g., PERCENT
+  value     Float    // 10.0 for 10%
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("coupons")
 }
 
 model UserPermission {

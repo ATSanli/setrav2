@@ -10,6 +10,8 @@ interface CartData {
   items: CartItemDisplay[]
   subtotal: number
   itemCount: number
+  couponCode?: string | null
+  discount?: number
 }
 
 export function useCart() {
@@ -90,6 +92,8 @@ export function useCart() {
   return {
     items: data?.items || [],
     subtotal: data?.subtotal || 0,
+    couponCode: data?.couponCode || null,
+    discount: data?.discount || 0,
     itemCount: data?.itemCount || 0,
     isLoading,
     error,
