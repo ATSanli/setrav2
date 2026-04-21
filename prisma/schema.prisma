@@ -272,6 +272,14 @@ model Settings {
   @@map("settings")
 }
 
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("newsletter_subscribers")
+}
+
 // Permission models for granular RBAC
 model Permission {
   id    String @id @default(cuid())

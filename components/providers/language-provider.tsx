@@ -47,7 +47,17 @@ export function useLanguage() {
 
 export function useT() {
   const { language } = useLanguage()
-  return (key: keyof typeof translations['tr']) => {
-    return (translations as any)[language]?.[key] ?? String(key)
+  return (key: string) => {
+    const parts = key.split('.')
+    let cur: any = (translations as any)[language]
+    for (const p of parts) {
+      if (!cur) break
+      cur = cur[p]
+    }
+    if (cur === undefined) {
+      // fallback to flat lookup (backwards compatibility)
+      return (translations as any)[language]?.[key] ?? key
+    }
+    return cur
   }
 }

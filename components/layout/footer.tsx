@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Instagram, Facebook, Twitter } from 'lucide-react'
 import { useT } from '@/components/providers/language-provider'
+import SubscribeSection from '@/components/newsletter/subscribe-section'
 
 const footerLinks = {
   shop: [
@@ -42,21 +43,7 @@ export function Footer() {
       <div className="border-b border-primary-foreground/10">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-xl mx-auto text-center">
-            <h3 className="font-serif text-2xl mb-3">{t('newsletter_title')}</h3>
-            <p className="text-primary-foreground/70 mb-6">{t('newsletter_sub')}</p>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder={t('email_placeholder')}
-                className="flex-1 px-4 py-3 bg-transparent border border-primary-foreground/30 rounded-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-primary-foreground text-primary font-medium rounded-sm hover:bg-primary-foreground/90 transition-colors"
-              >
-                {t('subscribe')}
-              </button>
-            </form>
+            <SubscribeSection variant="section1" />
           </div>
         </div>
       </div>

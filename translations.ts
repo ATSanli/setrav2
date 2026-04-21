@@ -189,6 +189,28 @@ export const translations = {
     // Footer
     newsletter_title: 'Bültenimize Katılın',
     newsletter_sub: 'Yeni koleksiyonlar ve özel fırsatlardan haberdar olun',
+    // Newsletter structured keys
+    newsletter: {
+      section1: {
+        title: 'Bülten',
+        subtitle: '%10 İndirimle Başlayın',
+        text: 'Takip ederek %10 indirim kazanın.',
+        placeholder: 'E-posta adresiniz',
+        button: 'Takibe Al',
+        note: 'Takip ederek gizlilik politikamızı kabul etmiş olursunuz.'
+      },
+      section2: {
+        title: 'Bültenimize Katılın',
+        text: 'Yeni koleksiyonlar ve özel fırsatlardan haberdar olun',
+        button: 'Abone Ol'
+      },
+      messages: {
+        success: 'Başarıyla abone oldunuz!',
+        exists: 'Bu email zaten kayıtlı',
+        invalid_email: 'Geçersiz e-posta',
+        required: 'E-posta gereklidir'
+      }
+    },
     // Instagram
     instagram: {
       title: 'Bizi Takip Edin',
@@ -428,6 +450,28 @@ export const translations = {
     // Footer
     newsletter_title: 'Join Our Newsletter',
     newsletter_sub: 'Be the first to know about new collections and exclusive offers',
+    // Newsletter structured keys
+    newsletter: {
+      section1: {
+        title: 'Newsletter',
+        subtitle: 'Start with 10% Off',
+        text: 'Subscribe and get 10% discount.',
+        placeholder: 'Your email address',
+        button: 'Subscribe',
+        note: 'By subscribing, you agree to our privacy policy.'
+      },
+      section2: {
+        title: 'Join Our Newsletter',
+        text: 'Be the first to know about new collections and special offers',
+        button: 'Subscribe'
+      },
+      messages: {
+        success: 'Successfully subscribed!',
+        exists: 'Email already exists',
+        invalid_email: 'Invalid email',
+        required: 'Email is required'
+      }
+    },
     // Instagram
     instagram: {
       title: 'Follow Us',
