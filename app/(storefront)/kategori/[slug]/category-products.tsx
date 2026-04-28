@@ -32,6 +32,8 @@ interface CategoryProductsProps {
     category: string
     isNew: boolean
     colors: { color: string; colorHex: string | null }[]
+    isFavorited?: boolean
+    favoriteId?: string | null
   }[]
   pagination: {
     page: number
@@ -366,7 +368,7 @@ export function CategoryProducts({
             {/* Product grid */}
             {products.length > 0 ? (
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-                {products.map((product) => (
+                {products.map((product: any) => (
                   <ProductCard
                     key={product.id}
                     id={product.id}
@@ -378,6 +380,8 @@ export function CategoryProducts({
                     category={product.category}
                     isNew={product.isNew}
                     colors={product.colors}
+                    isFavorited={product.isFavorited}
+                    initialFavoriteId={product.favoriteId}
                   />
                 ))}
               </div>

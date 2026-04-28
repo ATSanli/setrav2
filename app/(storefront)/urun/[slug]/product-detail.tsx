@@ -48,6 +48,8 @@ interface ProductDetailProps {
     image: string
     category: string
     colors: { color: string; colorHex: string | null }[]
+    isFavorited?: boolean
+    favoriteId?: string | null
   }[]
 }
 
@@ -447,7 +449,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
           <div className="container mx-auto px-4 py-16">
             <h2 className="font-serif text-2xl lg:text-3xl mb-8">{t('similar_products')}</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              {relatedProducts.map((product) => (
+              {relatedProducts.map((product: any) => (
                 <ProductCard
                   key={product.id}
                   id={product.id}
@@ -458,6 +460,8 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                   image={product.image}
                   category={product.category}
                   colors={product.colors}
+                  isFavorited={product.isFavorited}
+                  initialFavoriteId={product.favoriteId}
                 />
               ))}
             </div>

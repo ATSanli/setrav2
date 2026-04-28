@@ -5,6 +5,8 @@ import NewArrivalsHeader from '@/components/new-arrivals/header'
 import NewArrivalsEmpty from '@/components/new-arrivals/empty'
 import { prisma } from '@/lib/prisma'
 import { ProductCard } from '@/components/product-card'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Yeni Gelenler',
@@ -54,6 +56,18 @@ export default async function NewArrivalsPage({ searchParams }: Props) {
   const page = Number(search.page) || 1
   const { products, total, totalPages } = await getNewProducts(page)
 
+  // attach favorites when logged in
+  const session = await getServerSession(authOptions)
+  if (session) {
+    const ids = products.map(p => p.id)
+    const favs = await prisma.favorite.findMany({ where: { userId: session.user.id, productId: { in: ids } } })
+    const favMap = new Map(favs.map(f => [f.productId, f.id]))
+    products.forEach(p => {
+      ;(p as any).isFavorited = Boolean(favMap.get(p.id))
+      ;(p as any).favoriteId = favMap.get(p.id) ?? null
+    })
+  }
+
   return (
     <div className="min-h-screen">
       <NewArrivalsHeader total={total} />
@@ -62,7 +76,7 @@ export default async function NewArrivalsPage({ searchParams }: Props) {
         {/* Products */}
         {products.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-            {products.map((product) => (
+            {products.map((product: any) => (
               <ProductCard
                 key={product.id}
                 id={product.id}
@@ -74,6 +88,8 @@ export default async function NewArrivalsPage({ searchParams }: Props) {
                 category={product.category.name}
                 isNew={true}
                 colors={product.variants}
+                isFavorited={product.isFavorited}
+                initialFavoriteId={product.favoriteId}
               />
             ))}
           </div>

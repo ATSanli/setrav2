@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Search } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { ProductCard } from '@/components/product-card'
 import { translations } from '@/translations'
 
@@ -76,6 +78,18 @@ export default async function SearchPage({ searchParams }: Props) {
   
   const { products, total, totalPages } = await searchProducts(query, page)
 
+  // attach favorite flags for logged-in user
+  const session = await getServerSession(authOptions)
+  if (session) {
+    const productIds = products.map(p => p.id)
+    const favs = await prisma.favorite.findMany({ where: { userId: session.user.id, productId: { in: productIds } } })
+    const favMap = new Map(favs.map(f => [f.productId, f.id]))
+    products.forEach(p => {
+      ;(p as any).isFavorited = Boolean(favMap.get(p.id))
+      ;(p as any).favoriteId = favMap.get(p.id) ?? null
+    })
+  }
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -109,7 +123,7 @@ export default async function SearchPage({ searchParams }: Props) {
       <div className="container mx-auto px-4 py-12">
         {products.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-            {products.map((product) => (
+            {products.map((product: any) => (
               <ProductCard
                 key={product.id}
                 id={product.id}
@@ -121,6 +135,8 @@ export default async function SearchPage({ searchParams }: Props) {
                 category={product.category.name}
                 isNew={product.isNew}
                 colors={product.variants}
+                isFavorited={product.isFavorited}
+                initialFavoriteId={product.favoriteId}
               />
             ))}
           </div>

@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { CategoryProducts } from './category-products'
 
 interface Props {
@@ -167,6 +169,18 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     getFilterOptions(category.id)
   ])
 
+  // attach favorite flags for logged-in user
+  const session = await getServerSession(authOptions)
+  if (session) {
+    const productIds = products.map((p: any) => p.id)
+    const favs = await prisma.favorite.findMany({ where: { userId: session.user.id, productId: { in: productIds } } })
+    const favMap = new Map(favs.map(f => [f.productId, f.id]))
+    products.forEach((p: any) => {
+      ;(p as any).isFavorited = Boolean(favMap.get(p.id))
+      ;(p as any).favoriteId = favMap.get(p.id) ?? null
+    })
+  }
+
   return (
     <CategoryProducts
       category={{
@@ -177,7 +191,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         image: category.image,
         children: category.children
       }}
-      products={products.map(p => ({
+      products={products.map((p: any) => ({
         id: p.id,
         name: p.name,
         slug: p.slug,
@@ -186,7 +200,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         image: p.images[0]?.url || '/images/placeholder.jpg',
         category: p.category.name,
         isNew: p.isNew,
-        colors: p.variants
+        colors: p.variants,
+        isFavorited: p.isFavorited,
+        favoriteId: p.favoriteId
       }))}
       pagination={{ page, total, totalPages }}
       filterOptions={filterOptions}

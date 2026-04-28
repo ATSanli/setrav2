@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { ProductDetail } from './product-detail'
 
 interface Props {
@@ -87,6 +89,18 @@ export default async function ProductPage({ params }: Props) {
 
   const relatedProducts = await getRelatedProducts(product.categoryId, product.id)
 
+  // attach favorites to related products for logged-in user
+  const session = await getServerSession(authOptions)
+  if (session && relatedProducts.length > 0) {
+    const ids = relatedProducts.map(p => p.id)
+    const favs = await prisma.favorite.findMany({ where: { userId: session.user.id, productId: { in: ids } } })
+    const favMap = new Map(favs.map(f => [f.productId, f.id]))
+    relatedProducts.forEach(p => {
+      ;(p as any).isFavorited = Boolean(favMap.get(p.id))
+      ;(p as any).favoriteId = favMap.get(p.id) ?? null
+    })
+  }
+
   // Calculate average rating
   const avgRating = product.reviews.length > 0
     ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
@@ -132,7 +146,7 @@ export default async function ProductPage({ params }: Props) {
           createdAt: r.createdAt.toISOString()
         }))
       }}
-      relatedProducts={relatedProducts.map(p => ({
+      relatedProducts={relatedProducts.map((p: any) => ({
         id: p.id,
         name: p.name,
         slug: p.slug,
@@ -140,7 +154,9 @@ export default async function ProductPage({ params }: Props) {
         comparePrice: p.comparePrice ? Number(p.comparePrice) : null,
         image: p.images[0]?.url || '/images/placeholder.jpg',
         category: p.category.name,
-        colors: p.variants
+        colors: p.variants,
+        isFavorited: p.isFavorited,
+        favoriteId: p.favoriteId
       }))}
     />
   )

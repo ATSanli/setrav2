@@ -32,6 +32,7 @@ model User {
   addresses     Address[]
   orders        Order[]
   wishlist      WishlistItem[]
+  favorites     Favorite[]
   reviews       Review[]
   cart          Cart?
   userPermissions UserPermission[]
@@ -125,6 +126,7 @@ model Product {
   images        ProductImage[]
   reviews       Review[]
   wishlistItems WishlistItem[]
+  favoritedBy   Favorite[]
   cartItems     CartItem[]
   orderItems    OrderItem[]
 
@@ -249,6 +251,19 @@ model WishlistItem {
 
   @@unique([userId, productId])
   @@map("wishlist_items")
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
 }
 
 model Review {

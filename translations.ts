@@ -14,6 +14,14 @@ export const translations = {
     my_account: 'Hesabım',
     sign_in: 'Giriş Yap',
     wishlist: 'Favoriler',
+    favorites: {
+      title: 'Favoriler',
+      add: 'Favorilere Ekle',
+      remove: 'Favorilerden Çıkar',
+      empty: 'Favori ürün bulunamadı',
+      added: 'Favorilere eklendi',
+      removed: 'Favorilerden çıkarıldı'
+    },
     search: 'Ara',
     account: 'Hesabım',
     cart_sr: 'Sepet',
@@ -273,6 +281,14 @@ export const translations = {
     my_account: 'My Account',
     sign_in: 'Sign In',
     wishlist: 'Wishlist',
+    favorites: {
+      title: 'Favorites',
+      add: 'Add to Favorites',
+      remove: 'Remove from Favorites',
+      empty: 'No favorite products found',
+      added: 'Added to favorites',
+      removed: 'Removed from favorites'
+    },
     search: 'Search',
     account: 'Account',
     cart_sr: 'Cart',

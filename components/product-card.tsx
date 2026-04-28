@@ -20,6 +20,8 @@ interface ProductCardProps {
   isNew?: boolean
   isFeatured?: boolean
   colors?: { color: string; colorHex: string | null }[]
+  isFavorited?: boolean
+  initialFavoriteId?: string | null
 }
 
 export function ProductCard({
@@ -31,9 +33,12 @@ export function ProductCard({
   image,
   category,
   isNew,
-  colors
+  colors,
+  isFavorited,
+  initialFavoriteId
 }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false)
+  const [isWishlisted, setIsWishlisted] = useState(Boolean(isFavorited))
+  const [favoriteId, setFavoriteId] = useState<string | null>(initialFavoriteId ?? null)
   const [imageError, setImageError] = useState(false)
   const t = useT()
 
@@ -44,8 +49,49 @@ export function ProductCard({
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsWishlisted(!isWishlisted)
-    // TODO: Implement wishlist API call
+    // optimistic UI
+    if (!isWishlisted) {
+      setIsWishlisted(true)
+      try {
+        const res = await fetch('/api/favorites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: id }) })
+        if (res.status === 401) return window.location.href = '/giris'
+        const js = await res.json()
+        if (!res.ok) throw new Error(js?.error || 'Failed')
+        setFavoriteId(js?.id ?? null)
+        toast.success(t('favorites.added'))
+      } catch (err: any) {
+        setIsWishlisted(false)
+        toast.error(err?.message || t('add_failed'))
+      }
+    } else {
+      // remove
+      setIsWishlisted(false)
+      try {
+        let fid = favoriteId
+        if (!fid) {
+          // fallback: find favorite id
+          const r = await fetch('/api/favorites')
+          if (r.status === 401) return window.location.href = '/giris'
+          const js = await r.json()
+          const found = (js.items || []).find((it: any) => it.productId === id)
+          fid = found?.id
+        }
+        if (!fid) {
+          // nothing to delete
+          toast.success(t('favorites.removed'))
+          return
+        }
+        const d = await fetch(`/api/favorites/${fid}`, { method: 'DELETE' })
+        if (d.status === 401) return window.location.href = '/giris'
+        const jd = await d.json()
+        if (!d.ok) throw new Error(jd?.error || 'Failed')
+        setFavoriteId(null)
+        toast.success(t('favorites.removed'))
+      } catch (err: any) {
+        setIsWishlisted(true)
+        toast.error(err?.message || t('remove_failed'))
+      }
+    }
   }
 
   const handleAddToCart = async (e: React.MouseEvent) => {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -99,6 +101,27 @@ export async function GET(request: NextRequest) {
       }),
       prisma.product.count({ where })
     ])
+
+    // If user is logged in, fetch their favorites for these products
+    const session = await getServerSession(authOptions)
+    if (session?.user?.id) {
+      const productIds = products.map(p => p.id)
+      const favs = await prisma.favorite.findMany({ where: { userId: session.user.id, productId: { in: productIds } } })
+      const favMap = new Map(favs.map(f => [f.productId, f.id]))
+
+      // attach isFavorited and favoriteId to products
+      for (const p of products) {
+        const fid = favMap.get(p.id)
+        ;(p as any).isFavorited = Boolean(fid)
+        ;(p as any).favoriteId = fid ?? null
+      }
+    } else {
+      // ensure flags exist for unauthenticated requests
+      for (const p of products) {
+        ;(p as any).isFavorited = false
+        ;(p as any).favoriteId = null
+      }
+    }
 
     return NextResponse.json({
       products,

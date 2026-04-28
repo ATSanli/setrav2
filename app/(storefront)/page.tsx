@@ -319,6 +319,8 @@ export default function HomePage() {
                       category={product.category?.name || ''}
                       isFeatured={product.isFeatured}
                       colors={product.variants}
+                      isFavorited={product.isFavorited}
+                      initialFavoriteId={product.favoriteId}
                     />
                   </motion.div>
                 ))
@@ -429,6 +431,8 @@ Her parça, birinci sınıf kumaşlar ve titiz bir detaycılıkla üretilmiştir
                     category={product.category?.name || ''}
                     isNew={product.isNew}
                     colors={product.variants}
+                    isFavorited={product.isFavorited}
+                    initialFavoriteId={product.favoriteId}
                   />
                 </motion.div>
               ))
