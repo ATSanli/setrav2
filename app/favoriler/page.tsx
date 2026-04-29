@@ -1,8 +1,5 @@
-'use server'
+import FavoritesPage from '@/app/favorites/page'
 
-import { redirect } from 'next/navigation'
-
-export default function FavorilerRedirect() {
-  // Redirect Turkish `/favoriler` to the canonical `/favorites` page
-  redirect('/favorites')
+export default function FavorilerPage() {
+  return <FavoritesPage />
 }
