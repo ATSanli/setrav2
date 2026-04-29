@@ -9,7 +9,11 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const favId = params.id
-    console.log(`[favorites:delete] user=${session.user.id} favId=${favId}`)
+    console.log(`[favorites:delete] user=${session.user.id} params=`, params)
+    if (!favId) {
+      console.warn('[favorites:delete] missing favId in params', params)
+      return NextResponse.json({ error: 'Missing favorite id' }, { status: 400 })
+    }
     const fav = await prisma.favorite.findUnique({ where: { id: favId } })
     if (!fav) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     if (fav.userId !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
