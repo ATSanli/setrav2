@@ -17,6 +17,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Favorites DELETE error:', error)
-    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+    const message = (error as any)?.message || String(error) || 'Failed to delete favorite'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

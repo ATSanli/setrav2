@@ -17,15 +17,16 @@ export async function GET() {
     const items = favs.map(f => ({
       id: f.id,
       productId: f.productId,
-      name: f.product.name,
-      image: f.product.images[0]?.url || '/images/placeholder.jpg',
-      price: Number(f.product.price)
+      name: f.product?.name || 'Ürün',
+      image: f.product?.images?.[0]?.url || '/images/placeholder.jpg',
+      price: Number(f.product?.price || 0)
     }))
 
     return NextResponse.json({ items })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Favorites GET error:', error)
-    return NextResponse.json({ items: [] })
+    const message = error?.message || String(error) || 'Server error'
+    return NextResponse.json({ error: message, items: [] }, { status: 500 })
   }
 }
 
@@ -38,6 +39,10 @@ export async function POST(request: NextRequest) {
     const productId = String(body?.productId || '')
     if (!productId) return NextResponse.json({ error: 'productId required' }, { status: 400 })
 
+    // ensure product exists
+    const product = await prisma.product.findUnique({ where: { id: productId }, select: { id: true, isActive: true } })
+    if (!product || !product.isActive) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+
     // prevent duplicates
     const existing = await prisma.favorite.findFirst({ where: { userId: session.user.id, productId } })
     if (existing) return NextResponse.json({ success: true, id: existing.id })
@@ -46,6 +51,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, id: favorite.id })
   } catch (error) {
     console.error('Favorites POST error:', error)
-    return NextResponse.json({ error: 'Failed to add favorite' }, { status: 500 })
+    const message = (error as any)?.message || String(error) || 'Failed to add favorite'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
