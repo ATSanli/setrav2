@@ -5,8 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { toast } from 'sonner'
 import { useT } from '@/components/providers/language-provider'
+import { toast } from '@/components/ui/use-toast'
+import { Button } from '@/components/ui/button'
+import { Trash } from 'lucide-react'
 
 export default function FavoritesPage() {
   const { data: session } = useSession()
@@ -22,6 +24,7 @@ export default function FavoritesPage() {
       return
     }
     fetchFavorites()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
   async function fetchFavorites() {
@@ -32,7 +35,8 @@ export default function FavoritesPage() {
       const js = await res.json()
       setItems(js.items || [])
     } catch (err) {
-      console.error(err)
+      console.error('fetchFavorites error:', err)
+      toast({ title: t('error'), description: String(err) })
     } finally {
       setLoading(false)
     }
@@ -48,10 +52,11 @@ export default function FavoritesPage() {
         const js = await res.json()
         throw new Error(js?.error || 'Failed')
       }
-      toast.success(t('favorites.removed'))
+      toast({ title: t('favorites.removed') })
     } catch (err: any) {
       setItems(prev)
-      toast.error(err?.message || 'Failed')
+      console.error('handleRemove error:', err)
+      toast({ title: t('error'), description: err?.message || 'Failed' })
     }
   }
 
@@ -68,16 +73,18 @@ export default function FavoritesPage() {
           {items.map(item => (
             <div key={item.id} className="border rounded-md p-4 flex items-center gap-4">
               <Link href={`/urun/${item.productId}`} className="flex items-center gap-4">
-                <div className="w-24 h-24 relative">
-                  <Image src={item.image || '/images/placeholder.jpg'} alt={item.name} fill className="object-cover" />
+                <div className="w-28 h-28 relative flex-shrink-0">
+                  <Image src={item.image || '/images/placeholder.jpg'} alt={item.name} fill className="object-cover rounded" />
                 </div>
               </Link>
               <div className="flex-1">
-                <Link href={`/urun/${item.productId}`} className="block font-medium mb-1">{item.name}</Link>
-                <div className="text-sm text-muted-foreground">{new Intl.NumberFormat(undefined, { style: 'currency', currency: 'TRY' }).format(item.price)}</div>
+                <Link href={`/urun/${item.productId}`} className="block font-medium mb-1 hover:text-accent">{item.name}</Link>
+                <div className="text-sm text-muted-foreground">{new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.price)}</div>
               </div>
               <div>
-                <button onClick={() => handleRemove(item.id)} className="btn btn-ghost text-sm text-red-600">{t('favorites.remove')}</button>
+                <Button variant="ghost" onClick={() => handleRemove(item.id)} className="text-destructive">
+                  <Trash className="mr-2 h-4 w-4" /> {t('favorites.remove')}
+                </Button>
               </div>
             </div>
           ))}
