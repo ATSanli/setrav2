@@ -6,25 +6,18 @@ import { useT } from '@/components/providers/language-provider'
 
 const footerLinks = {
   shop: [
-    { name: 'Ferace', href: '/kategori/ferace' },
+
     { name: 'Elbise', href: '/kategori/elbise' },
     { name: 'Takım', href: '/kategori/takim' },
-    { name: 'Şal & Eşarp', href: '/kategori/sal-esarp' },
-    { name: 'Aksesuar', href: '/kategori/aksesuar' },
     { name: 'Yeni Gelenler', href: '/yeni-gelenler' },
   ],
   help: [
-    { name: 'Sipariş Takibi', href: '/siparis-takibi' },
-    { name: 'İade & Değişim', href: '/iade-degisim' },
-    { name: 'Kargo Bilgileri', href: '/kargo-bilgileri' },
-    { name: 'Beden Rehberi', href: '/beden-rehberi' },
-    { name: 'SSS', href: '/sss' },
+    { name: 'İletişim', href: '/iletisim' },
   ],
   about: [
     { name: 'Hakkımızda', href: '/hakkimizda' },
-    { name: 'Mağazalarımız', href: '/magazalarimiz' },
-    { name: 'Kariyer', href: '/kariyer' },
-    { name: 'İletişim', href: '/iletisim' },
+    { name: 'SETRA TECH', href: '/setra-tech' },
+
   ],
   legal: [
     { name: 'Gizlilik Politikası', href: '/gizlilik-politikasi' },

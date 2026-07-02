@@ -164,12 +164,19 @@ export function Header() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: categories.length * 0.1 }}
                       >
+
+                      </motion.div>
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (categories.length + 1) * 0.1 }}
+                      >
                         <Link
-                          href="/yeni-gelenler"
+                          href="/setra-tech"
                           className="block py-4 text-2xl font-serif text-accent border-b border-border/50"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          {t('new_arrivals')}
+                          SETRA TECH
                         </Link>
                       </motion.div>
                     </div>
@@ -241,14 +248,12 @@ export function Header() {
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-current transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
+
               <Link
-                href="/yeni-gelenler"
-                className={cn(
-                  'text-sm uppercase tracking-[0.15em] font-medium relative group',
-                  isHomepage && !scrolled ? 'text-accent' : 'text-accent'
-                )}
+                href="/setra-tech"
+                className="text-sm uppercase tracking-[0.15em] font-medium relative group text-accent"
               >
-                {t('new')}
+                SETRA TECH
                 <span className="absolute -bottom-1 left-0 w-0 h-px bg-accent transition-all duration-300 group-hover:w-full" />
               </Link>
             </nav>
