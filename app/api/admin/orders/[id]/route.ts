@@ -27,33 +27,26 @@ export async function PATCH(request: NextRequest, { params }: { params: any }) {
       data.note = cancelReason
     }
 
-    // If transitioning to CANCELLED/REJECTED, and order was NOT already CANCELLED,
-    // we should return stock for each order item by incrementing the related variant's stock.
-    if (target === 'CANCELLED' || target === 'REJECTED') {
-      if (existing.status !== 'CANCELLED') {
-        // build transaction: update order, and update each variant stock
-        const ops: any[] = []
-        ops.push(prisma.order.update({ where: { id }, data }))
-
+    if (target === 'CANCELLED') {
+      const result = await prisma.$transaction(async tx => {
+        const changed = await tx.order.updateMany({ where: { id, status: { not: 'CANCELLED' } }, data })
+        if (changed.count === 0) return { changed: false, order: await tx.order.findUnique({ where: { id } }) }
         for (const item of existing.items) {
-          if (item.variantId) {
-            ops.push(
-              prisma.productVariant.update({
-                where: { id: item.variantId },
-                data: { stock: { increment: item.quantity } }
-              })
-            )
+          if (item.trendyolReserved) {
+            const [variant] = await tx.$queryRaw<{ remoteStock: number | null; localStockDelta: number; trendyolStatus: string | null }[]>`SELECT "remoteStock", "localStockDelta", "trendyolStatus" FROM "product_variants" WHERE "id" = ${item.variantId} FOR UPDATE`
+            if (!variant) throw new Error('Sipariş varyantı bulunamadı')
+            const localStockDelta = variant.localStockDelta + item.quantity
+            await tx.productVariant.update({ where: { id: item.variantId }, data: {
+              localStockDelta,
+              stock: variant.trendyolStatus === 'onSale' ? Math.max(0, (variant.remoteStock ?? 0) + localStockDelta) : 0
+            } })
+          } else {
+            await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { increment: item.quantity } } })
           }
         }
-
-        const results = await prisma.$transaction(ops)
-        const updatedOrder = results[0]
-        return NextResponse.json({ order: updatedOrder, message: 'Sipariş iptal edildi ve stoklar güncellendi' })
-      } else {
-        // already cancelled — do not increment stocks again
-        const updated = await prisma.order.update({ where: { id }, data })
-        return NextResponse.json({ order: updated, message: 'Sipariş zaten iptal edilmiş; stok güncellemesi yapılmadı' })
-      }
+        return { changed: true, order: await tx.order.findUnique({ where: { id } }) }
+      })
+      return NextResponse.json({ order: result.order, message: result.changed ? 'Sipariş iptal edildi ve stoklar güncellendi' : 'Sipariş zaten iptal edilmiş' })
     }
 
     // Non-cancel status transitions: simple update

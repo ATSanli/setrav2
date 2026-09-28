@@ -123,6 +123,7 @@ export default async function ProductPage({ params }: Props) {
         price: Number(product.price),
         comparePrice: product.comparePrice ? Number(product.comparePrice) : null,
         sku: product.sku,
+        source: product.source,
         category: product.category,
         images: product.images,
         variants: product.variants.map(v => ({
@@ -130,7 +131,9 @@ export default async function ProductPage({ params }: Props) {
           size: v.size,
           color: v.color,
           colorHex: v.colorHex,
-          stock: v.stock
+          stock: product.source === 'TRENDYOL' && v.trendyolStatus !== 'onSale' ? 0 : v.stock,
+          price: v.salePriceCents === null ? Number(product.price) : v.salePriceCents / 100,
+          comparePrice: v.listPriceCents === null ? null : v.listPriceCents / 100
         })),
         colors,
         sizes,

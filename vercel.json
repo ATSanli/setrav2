@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/cron/trendyol", "schedule": "0 3 * * *" }
+  ]
+}

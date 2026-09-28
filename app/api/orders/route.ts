@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
 
     // Check stock availability
     for (const item of cart.items) {
-      if (item.variant.stock < item.quantity) {
+      if (item.product.source === 'TRENDYOL') return NextResponse.json({ error: 'Trendyol kaynaklı ürünler için SETRA siparişi kapalı' }, { status: 409 })
+      if (!item.product.isActive || item.variant.productId !== item.productId || item.variant.stock < item.quantity) {
         return NextResponse.json(
           { error: `${item.product.name}${translations.tr.insufficient_stock_suffix}` },
           { status: 400 }
@@ -71,14 +72,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate totals
-    const subtotal = cart.items.reduce(
-      (sum, item) => sum + Number(item.product.price) * item.quantity,
-      0
-    )
-    const shippingCost = subtotal >= 500 ? 0 : 29.90
+    const subtotalCents = cart.items.reduce((sum, item) => sum + (item.variant.salePriceCents ?? Math.round(item.product.price * 100)) * item.quantity, 0)
+    const subtotal = subtotalCents / 100
+    const shippingCents = subtotalCents >= 50000 ? 0 : 2990
+    const shippingCost = shippingCents / 100
     // Apply any cart-level discount (server-side coupon)
-    const discount = Number(cart.discount ?? 0)
-    const total = Math.max(0, subtotal + shippingCost - discount)
+    const discountCents = Math.round(Number(cart.discount ?? 0) * 100)
+    const discount = discountCents / 100
+    const total = Math.max(0, subtotalCents + shippingCents - discountCents) / 100
 
     // Create order with items in a transaction
     const order = await prisma.$transaction(async (tx) => {
@@ -99,8 +100,9 @@ export async function POST(request: NextRequest) {
               variantId: item.variantId,
               productName: item.product.name,
               variantInfo: `Beden: ${item.variant.size}, Renk: ${item.variant.color}`,
-              price: item.product.price,
-              quantity: item.quantity
+              price: (item.variant.salePriceCents ?? Math.round(item.product.price * 100)) / 100,
+              quantity: item.quantity,
+              trendyolReserved: item.product.source === 'TRENDYOL'
             }))
           }
         }
@@ -108,12 +110,11 @@ export async function POST(request: NextRequest) {
 
       // Update stock
       for (const item of cart.items) {
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: {
-            stock: { decrement: item.quantity }
-          }
+        const reserved = await tx.productVariant.updateMany({
+          where: { id: item.variantId, productId: item.productId, stock: { gte: item.quantity }, product: { isActive: true }, ...(item.product.source === 'TRENDYOL' ? { trendyolStatus: 'onSale' } : {}) },
+          data: { stock: { decrement: item.quantity }, ...(item.product.source === 'TRENDYOL' ? { localStockDelta: { decrement: item.quantity } } : {}) }
         })
+        if (reserved.count !== 1) throw new Error('INSUFFICIENT_STOCK')
       }
 
       // Clear cart

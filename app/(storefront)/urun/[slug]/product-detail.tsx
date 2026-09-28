@@ -22,9 +22,10 @@ interface ProductDetailProps {
     price: number
     comparePrice: number | null
     sku: string
+    source: string
     category: { id: string; name: string; slug: string }
     images: { id: string; url: string; alt: string | null }[]
-    variants: { id: string; size: string; color: string; colorHex: string | null; stock: number }[]
+    variants: { id: string; size: string; color: string; colorHex: string | null; stock: number; price: number; comparePrice: number | null }[]
     colors: { color: string; colorHex: string | null }[]
     sizes: string[]
     isNew: boolean
@@ -72,9 +73,13 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const selectedVariant = product.variants.find(
     v => v.color === selectedColor && v.size === selectedSize
   )
+  const displayedVariant = selectedVariant || product.variants.find(v => v.color === selectedColor && v.stock > 0)
+  const outOfStock = product.variants.every(v => v.stock <= 0)
+  const displayPrice = displayedVariant?.price ?? product.price
+  const displayComparePrice = displayedVariant?.comparePrice ?? product.comparePrice
 
-  const discount = product.comparePrice
-    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
+  const discount = displayComparePrice
+    ? Math.round(((displayComparePrice - displayPrice) / displayComparePrice) * 100)
     : null
 
   const handleAddToCart = async () => {
@@ -83,7 +88,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
       return
     }
 
-    if (!selectedVariant) {
+    if (!selectedVariant || selectedVariant.stock < quantity) {
       toast.error(t('variant_not_found'))
       return
     }
@@ -216,14 +221,16 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               {/* Price */}
               <div className="flex items-baseline gap-3">
                 <span className="text-2xl font-medium">
-                  {formatPrice(product.price)}
+                  {formatPrice(displayPrice)}
                 </span>
-                {product.comparePrice && (
+                {displayComparePrice && (
                   <span className="text-lg text-muted-foreground line-through">
-                    {formatPrice(product.comparePrice)}
+                    {formatPrice(displayComparePrice)}
                   </span>
                 )}
               </div>
+              {outOfStock && <p className="mt-3 text-sm text-destructive" role="status">Stokta yok</p>}
+              {product.source === 'TRENDYOL' && <p className="mt-3 text-sm text-muted-foreground" role="status">Trendyol stok bilgisi gösteriliyor. Bu ürün için SETRA üzerinden sipariş henüz açık değil.</p>}
             </div>
 
             {/* Color selection */}
@@ -306,7 +313,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(selectedVariant?.stock || 1, quantity + 1))}
                     className="w-12 h-12 flex items-center justify-center hover:bg-secondary transition-colors"
                   >
                     <Plus className="h-4 w-4" />
@@ -326,9 +333,9 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 size="lg"
                 className="flex-1 h-14"
                 onClick={handleAddToCart}
-                disabled={isAddingToCart || !selectedSize}
+                disabled={product.source === 'TRENDYOL' || isAddingToCart || !selectedSize || !selectedVariant || selectedVariant.stock < quantity}
               >
-                {isAddingToCart ? t('adding') : t('add_to_cart')}
+                {product.source === 'TRENDYOL' ? 'Siteden sipariş kapalı' : isAddingToCart ? t('adding') : t('add_to_cart')}
               </Button>
               <Button size="lg" variant="outline" className="h-14 w-14">
                 <Heart className="h-5 w-5" />

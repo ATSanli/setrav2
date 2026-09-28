@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 const navigation = [
   { name: translations.tr.dashboard, href: '/admin', icon: LayoutDashboard },
   { name: translations.tr.products || 'Ürünler', href: '/admin/urunler', icon: Package },
+  { name: 'Trendyol', href: '/admin/trendyol', icon: Package },
   { name: translations.tr.newsletter_title || 'Bülten', href: '/admin/newsletter', icon: MessageSquare },
   { name: translations.tr.categories || 'Kategoriler', href: '/admin/kategoriler', icon: FolderTree },
   { name: translations.tr.orders || 'Siparişler', href: '/admin/siparisler', icon: ShoppingCart },
@@ -66,7 +67,7 @@ export function AdminSidebar() {
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-4">
           {navigation.map((item) => {
-            if (item.href === '/admin/urunler' && !showProducts) return null
+            if ((item.href === '/admin/urunler' || item.href === '/admin/trendyol') && !showProducts) return null
             const isActive = pathname === item.href || 
               (item.href !== '/admin' && pathname.startsWith(item.href))
             

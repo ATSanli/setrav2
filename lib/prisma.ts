@@ -13,7 +13,7 @@ function createPrismaClient() {
     return new Proxy({}, handler) as PrismaClient
   }
 
-  const client = globalForPrisma.prisma ?? new PrismaClient()
+  const client: PrismaClient = globalForPrisma.prisma ?? new PrismaClient()
   if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = client
   return client
 }

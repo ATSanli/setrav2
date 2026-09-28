@@ -165,12 +165,12 @@ export async function GET() {
       image: item.product.images[0]?.url || '/images/placeholder.jpg',
       size: item.variant.size,
       color: item.variant.color,
-      price: Number(item.product.price),
+      price: item.variant.salePriceCents !== null ? item.variant.salePriceCents / 100 : Number(item.product.price),
       quantity: item.quantity,
-      stock: item.variant.stock
+      stock: item.product.source === 'TRENDYOL' ? 0 : item.variant.stock
     }))
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const subtotal = items.reduce((sum, item) => sum + Math.round(item.price * 100) * item.quantity, 0) / 100
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
     const couponCode = cart.couponCode || null
     const discount = Number(cart.discount ?? 0)
@@ -205,7 +205,6 @@ export async function POST(request: NextRequest) {
             coupon = await prisma.coupon.create({
               data: {
                 code: 'SETRA10',
-                name: 'SETRA10',
                 type: 'PERCENT',
                 value: 10,
                 active: true
@@ -214,7 +213,7 @@ export async function POST(request: NextRequest) {
           } catch (createErr) {
             // If create fails (e.g., table missing or DB issue), log details and fall back to manual 10% discount
             console.log('Hata detayı:', createErr)
-            const subtotal = cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0)
+            const subtotal = cart.items.reduce((sum, item) => sum + (item.variant.salePriceCents ?? Math.round(item.product.price * 100)) * item.quantity / 100, 0)
             const discount = Math.round((subtotal * 0.1) * 100) / 100
             try {
               await prisma.cart.update({ where: { id: cart.id }, data: { couponCode: 'SETRA10', discount } })
@@ -229,7 +228,7 @@ export async function POST(request: NextRequest) {
       }
 
       // calculate subtotal
-      const subtotal = cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0)
+      const subtotal = cart.items.reduce((sum, item) => sum + (item.variant.salePriceCents ?? Math.round(item.product.price * 100)) * item.quantity / 100, 0)
       let discount = 0
       if (coupon.type === 'PERCENT') {
         discount = Math.round((subtotal * (coupon.value / 100)) * 100) / 100
@@ -251,6 +250,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!Number.isInteger(quantity) || quantity < 1) return NextResponse.json({ error: 'Geçersiz adet' }, { status: 400 })
+    const variant = await prisma.productVariant.findFirst({ where: { id: variantId, productId, product: { isActive: true } }, include: { product: { select: { source: true } } } })
+    if (!variant) return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 })
+    if (variant.product.source === 'TRENDYOL') return NextResponse.json({ error: 'Trendyol kaynaklı ürünler için SETRA siparişi kapalı' }, { status: 409 })
+
     const cart = await getOrCreateCart(session?.user?.id)
 
     // Check if item already exists
@@ -264,12 +268,14 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingItem) {
+      if (variant.stock < existingItem.quantity + quantity) return NextResponse.json({ error: 'Yetersiz stok' }, { status: 400 })
       // Update quantity
       await prisma.cartItem.update({
         where: { id: existingItem.id },
         data: { quantity: existingItem.quantity + quantity }
       })
     } else {
+      if (variant.stock < quantity) return NextResponse.json({ error: 'Yetersiz stok' }, { status: 400 })
       // Create new item
       await prisma.cartItem.create({
         data: {

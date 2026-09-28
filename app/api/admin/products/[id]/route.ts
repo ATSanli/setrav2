@@ -46,6 +46,10 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
     }
 
     const body = await request.json()
+    const source = await prisma.product.findUnique({ where: { id }, select: { source: true } })
+    if (source?.source === 'TRENDYOL' && Object.keys(body).some(key => !['isFeatured', 'isBestSeller', 'isNew'].includes(key))) {
+      return NextResponse.json({ error: 'Trendyol ürünleri kaynak mağazadan yönetilir; kategori eşlemesi için Trendyol panelini kullanın.' }, { status: 409 })
+    }
 
     // Build update data only from provided fields to allow partial updates (e.g., toggling isBestSeller)
     const upData: any = {}
@@ -205,6 +209,9 @@ export async function DELETE(request: NextRequest, { params }: { params: any }) 
     if (!id) {
       return NextResponse.json({ error: 'Missing product id' }, { status: 400 })
     }
+
+    const source = await prisma.product.findUnique({ where: { id }, select: { source: true } })
+    if (source?.source === 'TRENDYOL') return NextResponse.json({ error: 'Trendyol ürünleri yalnızca eşitleme ile pasifleştirilir.' }, { status: 409 })
 
     await prisma.$transaction([
       prisma.productImage.deleteMany({ where: { productId: id } }),
