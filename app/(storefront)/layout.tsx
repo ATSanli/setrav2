@@ -1,6 +1,5 @@
 import { SessionProvider } from '@/components/providers/session-provider'
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout/footer'
+import { StorefrontShell } from '@/components/setra-tech/storefront-shell'
 
 export default function StorefrontLayout({
   children,
@@ -9,13 +8,7 @@ export default function StorefrontLayout({
 }) {
   return (
     <SessionProvider>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-      </div>
+      <StorefrontShell>{children}</StorefrontShell>
     </SessionProvider>
   )
 }

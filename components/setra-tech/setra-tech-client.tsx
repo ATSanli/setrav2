@@ -1,796 +1,228 @@
 'use client'
 
-import type { CSSProperties, MouseEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import {
-  ArrowRight,
-  BadgeCheck,
-  BarChart3,
-  BrainCircuit,
-  Bot,
-  CheckCircle2,
-  Code2,
-  Cpu,
-  DatabaseZap,
-  ExternalLink,
-  Globe,
-  Layers3,
-  LayoutDashboard,
-  LineChart,
-  Megaphone,
-  MousePointer2,
-  Network,
-  ScanSearch,
-  ShieldCheck,
-  Sparkles,
-  Store,
-  Workflow,
-  Zap,
+  ArrowRight, ArrowUpRight, BrainCircuit, Code2, Database, Globe2,
+  Menu, Megaphone, ScanEye, Server, Workflow, X,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { projectFilters, projects } from './content'
 
 const whatsappUrl =
   'https://wa.me/905069843195?text=Merhaba%2C%20SETRA%20TECH%20hizmetleri%20i%C3%A7in%20teklif%20almak%20istiyorum.'
 
-const services: Array<{
-  title: string
-  description: string
-  icon: LucideIcon
-}> = [
-  {
-    title: 'Özel Yazılım Geliştirme',
-    description:
-      'İşletmenizin süreçlerine özel web uygulamaları, admin panelleri, dashboard sistemleri ve yönetim yazılımları geliştiriyoruz.',
-    icon: Code2,
-  },
-  {
-    title: 'E-Ticaret Altyapıları',
-    description:
-      'Modern, hızlı ve yönetilebilir e-ticaret siteleri kuruyor; ürün, stok, fiyat, sipariş ve müşteri süreçlerini tek merkezden yönetilebilir hale getiriyoruz.',
-    icon: Store,
-  },
-  {
-    title: 'Pazaryeri Entegrasyonları',
-    description:
-      'Trendyol ve benzeri pazaryerleriyle stok, fiyat, ürün ve sipariş entegrasyonları geliştirerek manuel iş yükünü azaltıyoruz.',
-    icon: Workflow,
-  },
-  {
-    title: 'Stok ve Fiyat Otomasyonu',
-    description:
-      'Pazaryeri, web sitesi ve veritabanı arasında otomatik stok ve fiyat senkronizasyonu sağlayarak ürün bilgilerinin güncel kalmasını sağlıyoruz.',
-    icon: LineChart,
-  },
-  {
-    title: 'Yapay Zeka Destekli Otomasyon',
-    description:
-      'Tekrarlayan işleri otomatikleştiren, veri işleyen, raporlayan ve karar süreçlerini destekleyen yapay zeka tabanlı çözümler geliştiriyoruz.',
-    icon: BrainCircuit,
-  },
-  {
-    title: 'Görüntü İşleme ve Bilgisayarlı Görü',
-    description:
-      'Kamera sistemleri, hedef takibi, QR/etiket okuma, nesne algılama ve görüntü analizine dayalı özel çözümler geliştiriyoruz.',
-    icon: ScanSearch,
-  },
-  {
-    title: 'Kurumsal Dashboard ve Raporlama',
-    description:
-      'Satış, stok, performans, operasyon ve finans verilerini anlaşılır panellerle takip edilebilir hale getiriyoruz.',
-    icon: LayoutDashboard,
-  },
-  {
-    title: 'Web Site ve Landing Page Tasarımı',
-    description:
-      'Markanız için hızlı, modern, SEO uyumlu ve dönüşüm odaklı web siteleri ve landing page tasarımları hazırlıyoruz.',
-    icon: Globe,
-  },
-  {
-    title: 'Reklam ve Lead Toplama Sistemleri',
-    description:
-      'Google Ads, form altyapıları, randevu sistemleri ve müşteri toplama süreçleri için dijital çözümler oluşturuyoruz.',
-    icon: Megaphone,
-  },
-  {
-    title: 'Veritabanı, API ve Entegrasyon Çözümleri',
-    description:
-      'Mevcut sistemlerinizin birbiriyle konuşmasını sağlayan API, veritabanı, bulut ve entegrasyon altyapıları geliştiriyoruz.',
-    icon: DatabaseZap,
-  },
+const services: { title: string; description: string; icon: LucideIcon }[] = [
+  { title: 'Özel yazılım ve yönetim panelleri', description: 'İş akışınıza uygun web uygulamaları, rol bazlı paneller ve operasyon araçları.', icon: Code2 },
+  { title: 'E-ticaret ve pazaryeri entegrasyonları', description: 'Mağaza deneyimi, katalog yönetimi ve pazaryeri veri akışları.', icon: Workflow },
+  { title: 'Yapay zekâ ve iş otomasyonu', description: 'Tekrarlanan veri girişlerini ve karar destek süreçlerini sadeleştiren çözümler.', icon: BrainCircuit },
+  { title: 'Görüntü işleme', description: 'Görsel veride algılama, sınıflandırma ve analiz gerektiren uygulamalar.', icon: ScanEye },
+  { title: 'IT, sunucu ve bulut altyapısı', description: 'Barındırma, ağ ve bulut ihtiyaçlarını güvenlik ve büyüme hedefleriyle birlikte ele alma.', icon: Server },
+  { title: 'Web sitesi tasarımı', description: 'Mobil uyumlu, erişilebilir ve yönetimi kolay kurumsal siteler.', icon: Globe2 },
+  { title: 'Veri, API ve raporlama', description: 'Sistemler arası bağlantılar ve anlaşılır rapor ekranları.', icon: Database },
+  { title: 'Dijital pazarlama', description: 'Kampanya sayfaları, ölçümleme ve dijital kanal planlaması.', icon: Megaphone },
 ]
 
-const reasons = [
-  'İşletmeye özel çözüm yaklaşımı',
-  'Gereksiz karmaşa olmadan net ve uygulanabilir sistemler',
-  'E-ticaret, otomasyon ve yazılımı birlikte düşünen yapı',
-  'Modern teknolojilerle ölçeklenebilir altyapı',
-  'Yönetilebilir admin panelleri',
-  'Performans, güvenlik ve sürdürülebilirlik odaklı geliştirme',
+const process = [
+  { number: '01', title: 'Keşif', description: 'İhtiyacı, mevcut sistemi ve hedefi birlikte netleştiririz.' },
+  { number: '02', title: 'Mimari', description: 'Ekranları, veri akışını ve uygulanabilir kapsamı planlarız.' },
+  { number: '03', title: 'Geliştirme', description: 'Çözümü geliştirir, gerçek kullanım senaryolarıyla test ederiz.' },
+  { number: '04', title: 'İyileştirme', description: 'Teslim sonrası ihtiyaçları değerlendirir, sistemi geliştiririz.' },
 ]
 
-const workAreas = [
-  'E-Ticaret',
-  'Moda & Perakende',
-  'Pazaryeri Entegrasyonları',
-  'Admin Panel Sistemleri',
-  'Otomasyon Yazılımları',
-  'Yapay Zeka Uygulamaları',
-  'Görüntü İşleme',
-  'Kurumsal Raporlama',
-  'Web Tasarım',
-  'API Entegrasyonları',
-  'Bulut & Veritabanı',
-  'Lead Toplama Sistemleri',
-]
+const capabilities = ['Next.js / React', 'Node.js / API', 'PostgreSQL / Prisma', 'OCR', 'Görüntü analizi', 'Bulut ve sunucu']
 
-const processSteps = [
-  {
-    step: '01',
-    title: 'Analiz',
-    description: 'İhtiyacınızı, mevcut sisteminizi ve hedeflerinizi netleştiriyoruz.',
-    icon: MousePointer2,
-  },
-  {
-    step: '02',
-    title: 'Planlama',
-    description: 'Teknik altyapı, ekranlar, veri akışı ve entegrasyon yapısını planlıyoruz.',
-    icon: Layers3,
-  },
-  {
-    step: '03',
-    title: 'Geliştirme',
-    description: 'Modern, güvenli ve sürdürülebilir kod yapısıyla sistemi geliştiriyoruz.',
-    icon: Cpu,
-  },
-  {
-    step: '04',
-    title: 'Teslim & Destek',
-    description: 'Projeyi yayına alıyor, test ediyor ve ihtiyaç halinde geliştirmeye devam ediyoruz.',
-    icon: ShieldCheck,
-  },
-]
+function TechNav() {
+  const [open, setOpen] = useState(false)
+  const links = [
+    { href: '#projects', label: 'Projeler' },
+    { href: '#services', label: 'Hizmetler' },
+    { href: '#process', label: 'Yaklaşım' },
+  ]
 
-const stats = [
-  {
-    value: '10+',
-    label: 'Hizmet alanı',
-  },
-  {
-    value: '24/7',
-    label: 'Dijital süreç mantığı',
-  },
-  {
-    value: 'API',
-    label: 'Entegrasyon odaklı yapı',
-  },
-]
-
-const stackItems = [
-  {
-    label: 'Frontend',
-    value: 'Next.js / React',
-  },
-  {
-    label: 'Backend',
-    value: 'Node.js / API',
-  },
-  {
-    label: 'Database',
-    value: 'PostgreSQL / Prisma',
-  },
-  {
-    label: 'Automation',
-    value: 'AI / Workflow',
-  },
-]
-
-function handleSpotlightMove(event: MouseEvent<HTMLElement>) {
-  const target = event.currentTarget
-  const rect = target.getBoundingClientRect()
-
-  target.style.setProperty('--mouse-x', `${event.clientX - rect.left}px`)
-  target.style.setProperty('--mouse-y', `${event.clientY - rect.top}px`)
-}
-
-function handleTiltMove(event: MouseEvent<HTMLElement>) {
-  const target = event.currentTarget
-  const rect = target.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const y = event.clientY - rect.top
-
-  const rotateX = ((y / rect.height - 0.5) * -10).toFixed(2)
-  const rotateY = ((x / rect.width - 0.5) * 10).toFixed(2)
-
-  target.style.setProperty('--tilt-x', `${rotateX}deg`)
-  target.style.setProperty('--tilt-y', `${rotateY}deg`)
-  target.style.setProperty('--shine-x', `${x}px`)
-  target.style.setProperty('--shine-y', `${y}px`)
-}
-
-function handleTiltLeave(event: MouseEvent<HTMLElement>) {
-  const target = event.currentTarget
-
-  target.style.setProperty('--tilt-x', '0deg')
-  target.style.setProperty('--tilt-y', '0deg')
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-  center = false,
-}: {
-  eyebrow: string
-  title: string
-  description?: string
-  center?: boolean
-}) {
   return (
-    <div className={center ? 'mx-auto max-w-3xl text-center' : 'max-w-3xl'}>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-[#d4af37]">
-        {eyebrow}
-      </p>
-      <h2 className="font-serif text-3xl tracking-tight text-white md:text-4xl lg:text-5xl">
-        {title}
-      </h2>
-      {description ? (
-        <p className="mt-4 text-base leading-7 text-white/60 md:text-lg">{description}</p>
-      ) : null}
-    </div>
-  )
-}
-
-function SpotlightCard({
-  children,
-  className = '',
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <div
-      onMouseMove={handleSpotlightMove}
-      className={`group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.045] shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[#d4af37]/40 ${className}`}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={
-          {
-            background:
-              'radial-gradient(520px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 175, 55, 0.18), transparent 42%)',
-          } as CSSProperties
-        }
-      />
-      <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/10" />
-      <div className="relative">{children}</div>
-    </div>
-  )
-}
-
-function ServiceCard({
-  title,
-  description,
-  icon: Icon,
-}: {
-  title: string
-  description: string
-  icon: LucideIcon
-}) {
-  return (
-    <SpotlightCard>
-      <div className="p-6">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div className="flex h-13 w-13 items-center justify-center rounded-2xl border border-[#d4af37]/30 bg-[#d4af37]/10 text-[#d4af37] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#d4af37] group-hover:text-black">
-            <Icon className="h-5 w-5" />
+    <>
+      <a href="#tech-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-full focus:bg-[#b8f5eb] focus:px-5 focus:py-3 focus:text-[#08101b]">İçeriğe geç</a>
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#08101b]/95 text-white backdrop-blur-xl">
+        <nav aria-label="SETRA TECH gezinme" className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
+          <div className="flex items-center gap-4 sm:gap-8">
+            <Link href="/" className="text-xs font-medium tracking-[0.28em] text-white/65 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]" aria-label="SETRA mağazasına dön">SETRA</Link>
+            <span aria-hidden="true" className="h-5 w-px bg-white/20" />
+            <Link href="/setra-tech" className="whitespace-nowrap text-sm font-semibold tracking-[0.15em] text-[#b8f5eb] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">TECH<span className="text-[#e3c675]">.</span></Link>
           </div>
-          <ArrowRight className="h-5 w-5 translate-x-2 text-white/20 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:text-[#d4af37] group-hover:opacity-100" />
-        </div>
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-        <p className="mt-3 text-sm leading-7 text-white/58">{description}</p>
-      </div>
-    </SpotlightCard>
+          <div className="hidden items-center gap-8 md:flex">
+            {links.map((link) => <Link key={link.href} href={link.href} className="text-sm text-white/65 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">{link.label}</Link>)}
+          </div>
+          <div className="flex items-center gap-2">
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#b8f5eb] px-4 text-xs font-semibold text-[#07131b] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb] sm:px-5 sm:text-sm">Teklif al <ArrowUpRight aria-hidden="true" className="h-4 w-4" /></a>
+            <button type="button" aria-label={open ? 'Menüyü kapat' : 'Menüyü aç'} aria-expanded={open} aria-controls="tech-mobile-nav" onClick={() => setOpen(!open)} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white md:hidden">
+              {open ? <X aria-hidden="true" className="h-5 w-5" /> : <Menu aria-hidden="true" className="h-5 w-5" />}
+            </button>
+          </div>
+        </nav>
+        {open && <div id="tech-mobile-nav" className="flex flex-col gap-1 border-t border-white/10 px-5 py-3 md:hidden">{links.map((link) => <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-base text-white/80 focus-visible:outline-2 focus-visible:outline-[#b8f5eb]">{link.label}</Link>)}</div>}
+      </header>
+    </>
   )
 }
 
-function FloatingCodePanel() {
+function TechGraphic({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/35 p-4 shadow-2xl backdrop-blur-xl">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="h-3 w-3 rounded-full bg-red-400/80" />
-        <span className="h-3 w-3 rounded-full bg-yellow-400/80" />
-        <span className="h-3 w-3 rounded-full bg-green-400/80" />
-        <span className="ml-auto text-xs uppercase tracking-[0.24em] text-white/35">Live Build</span>
-      </div>
+    <div aria-hidden="true" className={`relative isolate mx-auto aspect-square w-full ${compact ? 'max-w-[410px]' : 'max-w-[520px]'}`}>
+      <div className="absolute inset-[7%] rounded-full border border-[#b8f5eb]/25 bg-[radial-gradient(circle,#23677140_0%,#17283b40_38%,transparent_72%)] shadow-[0_0_100px_#4dd4be1a]" />
+      <div className="absolute inset-[18%] rounded-full border border-dashed border-[#b8f5eb]/25" />
+      <div className="absolute inset-[30%] rounded-full border border-[#e3c675]/40" />
+      <svg viewBox="0 0 500 500" className="absolute inset-0 h-full w-full text-[#b8f5eb]" fill="none" role="presentation">
+        <path d="M43 157 250 250 447 92M72 391 250 250 435 380M250 28v222" stroke="currentColor" strokeOpacity=".35" strokeWidth="1.4" />
+        <path d="M43 157 250 250 447 92M72 391 250 250 435 380M250 28v222" stroke="currentColor" strokeOpacity=".38" strokeWidth="4" strokeDasharray="2 16" />
+        {[[43,157],[447,92],[72,391],[435,380],[250,28]].map(([cx,cy]) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="5" fill="currentColor" />)}
+        <circle cx="250" cy="250" r="28" fill="#0c1e2c" stroke="#b8f5eb" strokeWidth="2" />
+        <circle cx="250" cy="250" r="8" fill="#e3c675" />
+      </svg>
+      <div className="absolute left-[8%] top-[28%] h-2 w-2 rounded-full bg-[#e3c675] shadow-[0_0_20px_#e3c675] motion-safe:animate-pulse" />
+      <div className="absolute bottom-[22%] right-[12%] h-2 w-2 rounded-full bg-[#b8f5eb] shadow-[0_0_20px_#b8f5eb] motion-safe:animate-pulse" />
+    </div>
+  )
+}
 
-      <div className="space-y-3 font-mono text-xs leading-6 text-white/70">
-        <p>
-          <span className="text-[#d4af37]">const</span>{' '}
-          <span className="text-white">setraTech</span> = {'{'}
-        </p>
-        <p className="pl-4">
-          services: <span className="text-emerald-300">"software + automation"</span>,
-        </p>
-        <p className="pl-4">
-          source: <span className="text-emerald-300">"business needs"</span>,
-        </p>
-        <p className="pl-4">
-          result: <span className="text-emerald-300">"scalable system"</span>,
-        </p>
-        <p>{'}'}</p>
-      </div>
+function Portfolio() {
+  const [filter, setFilter] = useState<(typeof projectFilters)[number]['id']>('all')
+  const featured = projects[0]
+  const visible = projects.slice(1).filter((project) => filter === 'all' || project.category === filter)
 
-      <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
-        <div className="setra-scan-line h-px w-full bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
-        <div className="grid grid-cols-3 gap-px bg-white/10 text-center">
-          {['API', 'AI', 'DATA'].map((item) => (
-            <div key={item} className="bg-black/45 px-3 py-4">
-              <p className="text-xs font-semibold tracking-[0.25em] text-[#d4af37]">{item}</p>
-              <p className="mt-1 text-[11px] text-white/40">READY</p>
+  return (
+    <section id="projects" aria-labelledby="projects-title" className="relative scroll-mt-20 border-t border-white/10 bg-[#0b1422] py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b8f5eb]">01 / Seçilmiş işler</p>
+            <h2 id="projects-title" className="mt-5 max-w-3xl font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">Fikirden çalışan sisteme.</h2>
+          </div>
+          <p className="max-w-sm text-sm leading-7 text-white/60">Her proje, gerçek bir iş ihtiyacına verilen farklı bir teknoloji yanıtı.</p>
+        </div>
+
+        <article aria-label="Öne çıkan referans: CompOS" className="relative isolate overflow-hidden rounded-[2rem] border border-[#b8f5eb]/25 bg-[linear-gradient(125deg,#173447_0%,#101c2d_50%,#111727_100%)] p-6 shadow-[0_30px_100px_#0007] sm:p-10 lg:p-14">
+          <div className="absolute -right-16 -top-24 h-80 w-80 rounded-full bg-[#7fe5d9]/10 blur-3xl" />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1.12fr_.88fr]">
+            <div>
+              <p className="inline-flex rounded-full border border-[#b8f5eb]/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#b8f5eb]">Öne çıkan proje / 01</p>
+              <h3 className="mt-8 font-serif text-5xl leading-[1.04] text-white sm:text-6xl lg:text-7xl">CompOS{' '}<span className="mt-3 block font-sans text-sm font-medium uppercase tracking-[0.2em] text-[#b8f5eb] sm:text-base">— Company OPERATING System</span></h3>
+              <p className="mt-8 max-w-xl text-lg leading-8 text-white/85">{featured.solution}</p>
+              <div className="mt-8 border-t border-white/15 pt-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Karşıladığı ihtiyaç</p>
+                <p className="mt-2 max-w-lg text-sm leading-7 text-white/70">{featured.problem}</p>
+              </div>
+              <Link href="#contact" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold text-[#b8f5eb] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">Benzer bir ihtiyaç için görüşelim <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
             </div>
+            <TechGraphic compact />
+          </div>
+        </article>
+
+        <div className="mt-20 flex flex-col justify-between gap-6 border-b border-white/15 pb-7 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b8f5eb]">Proje arşivi</p>
+            <h3 className="mt-3 font-serif text-3xl text-white sm:text-4xl">Diğer referanslar</h3>
+          </div>
+          <p className="max-w-md text-sm leading-6 text-white/55">Geliştirilen çözümü ve karşıladığı ihtiyacı kısa biçimde inceleyin.</p>
+        </div>
+        <div role="group" aria-label="Referansları filtrele" className="mt-6 flex flex-wrap gap-2">
+          {projectFilters.map((item) => (
+            <button key={item.id} type="button" aria-pressed={filter === item.id} onClick={() => setFilter(item.id)} className={`rounded-full border px-4 py-2.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8f5eb] ${filter === item.id ? 'border-[#b8f5eb] bg-[#b8f5eb] font-semibold text-[#08101b]' : 'border-white/20 text-white/70 hover:border-[#b8f5eb]/60 hover:text-white'}`}>{item.label}</button>
           ))}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function HeroSystemCard() {
-  return (
-    <div
-      onMouseMove={handleTiltMove}
-      onMouseLeave={handleTiltLeave}
-      className="setra-tilt-card relative mx-auto max-w-xl transition-transform duration-200 ease-out"
-      style={
-        {
-          transform:
-            'perspective(1200px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))',
-          transformStyle: 'preserve-3d',
-        } as CSSProperties
-      }
-    >
-      <div className="absolute -inset-10 rounded-[3rem] bg-[#d4af37]/20 blur-3xl" />
-
-      <Card className="relative overflow-hidden rounded-[2.5rem] border-white/10 bg-white/[0.055] text-white shadow-[0_40px_140px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          style={
-            {
-              background:
-                'radial-gradient(480px circle at var(--shine-x, 50%) var(--shine-y, 50%), rgba(255,255,255,0.16), transparent 45%)',
-            } as CSSProperties
-          }
-        />
-
-        <CardContent className="relative p-5 md:p-7">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <Badge className="rounded-full border border-[#d4af37]/25 bg-[#d4af37]/12 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-[#d4af37] hover:bg-[#d4af37]/12">
-              AUTOMATION Stack
-            </Badge>
-            <div className="flex items-center gap-2 text-xs text-white/45">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
-              </span>
-              Online
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-3xl border border-white/10 bg-black/25 p-5">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#d4af37] text-black">
-                <Store className="h-5 w-5" />
-              </div>
-              <p className="text-sm font-semibold">E-Ticaret Katmanı</p>
-              <p className="mt-2 text-xs leading-6 text-white/50">Ürün, stok, fiyat, sipariş ve müşteri akışları</p>
-
-              <div className="mt-5 space-y-2">
-                {['Product Sync', 'Price Update', 'Order Flow'].map((item) => (
-                  <div key={item} className="flex items-center justify-between rounded-xl bg-white/[0.055] px-3 py-2">
-                    <span className="text-xs text-white/55">{item}</span>
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-5">
-              <div className="mb-5 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-black">
-                  <Bot className="h-5 w-5" />
+        <div aria-live="polite" className="mt-7 grid gap-x-10 md:grid-cols-2">
+          {visible.map((project) => {
+            const position = projects.indexOf(project) + 1
+            return (
+              <article key={project.name} className="group grid gap-4 border-b border-white/15 py-8 sm:grid-cols-[3.5rem_1fr] sm:gap-5">
+                <span aria-hidden="true" className="font-mono text-xs text-[#b8f5eb]/70">{String(position).padStart(2, '0')}</span>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-[#b8f5eb]">{project.area}</p>
+                  <h4 className="mt-3 font-serif text-2xl leading-tight text-white transition group-hover:text-[#b8f5eb]">{project.name}</h4>
+                  <p className="mt-4 text-sm leading-7 text-white/65"><span className="font-semibold text-white/85">İhtiyaç:</span> {project.problem}</p>
+                  <p className="mt-2 text-sm leading-7 text-white/65"><span className="font-semibold text-white/85">Çözüm:</span> {project.solution}</p>
+                  {project.href && <Link href={project.href} className="mt-4 inline-flex items-center gap-1.5 text-sm text-[#b8f5eb] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b8f5eb]">{project.linkLabel} <ArrowUpRight aria-hidden="true" className="h-4 w-4" /></Link>}
                 </div>
-                <Network className="h-5 w-5 text-[#d4af37]" />
-              </div>
-              <p className="text-sm font-semibold">Otomasyon Motoru</p>
-              <p className="mt-2 text-xs leading-6 text-white/50">AI destekli iş akışları ve API entegrasyonları</p>
-
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                {[
-                  { label: 'API', icon: DatabaseZap },
-                  { label: 'AI', icon: BrainCircuit },
-                  { label: 'Panel', icon: BarChart3 },
-                ].map(({ label, icon: Icon }) => (
-                  <div key={label} className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center">
-                    <Icon className="mx-auto h-4 w-4 text-[#d4af37]" />
-                    <p className="mt-2 text-[11px] text-white/55">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {stats.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-xl font-semibold text-white">{item.value}</p>
-                <p className="mt-1 text-xs text-white/45">{item.label}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 rounded-3xl border border-white/10 bg-black/25 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/35">Infrastructure</p>
-              <Zap className="h-4 w-4 text-[#d4af37]" />
-            </div>
-
-            <div className="grid gap-2">
-              {stackItems.map((item, index) => (
-                <div key={item.label} className="grid grid-cols-[0.8fr_1.2fr] items-center gap-3">
-                  <span className="text-xs text-white/45">{item.label}</span>
-                  <div className="overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="setra-progress h-2 rounded-full bg-gradient-to-r from-[#d4af37] to-white"
-                      style={{ width: `${72 + index * 7}%`, animationDelay: `${index * 120}ms` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="setra-float absolute -right-4 -top-5 hidden rounded-2xl border border-white/10 bg-black/50 p-4 shadow-2xl backdrop-blur-xl md:block">
-        <Sparkles className="h-5 w-5 text-[#d4af37]" />
+              </article>
+            )
+          })}
+        </div>
       </div>
-
-      <div className="setra-float-delayed absolute -bottom-8 -left-6 hidden w-56 md:block">
-        <FloatingCodePanel />
-      </div>
-    </div>
+    </section>
   )
 }
 
 export default function SetraTechClient() {
-  const [mouse, setMouse] = useState({ x: -500, y: -500 })
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-
-    const handleMove = (event: PointerEvent) => {
-      setMouse({ x: event.clientX, y: event.clientY })
-    }
-
-    window.addEventListener('pointermove', handleMove)
-
-    return () => {
-      window.removeEventListener('pointermove', handleMove)
-    }
-  }, [])
-
   return (
-    <main className="relative overflow-hidden bg-[#07070a] text-white">
-      <style>
-        {`
-          @keyframes setra-float {
-            0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-            50% { transform: translate3d(0, -14px, 0) rotate(1deg); }
-          }
-
-          @keyframes setra-float-delayed {
-            0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-            50% { transform: translate3d(0, 12px, 0) rotate(-1deg); }
-          }
-
-          @keyframes setra-scan {
-            0% { transform: translateX(-120%); opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { transform: translateX(120%); opacity: 0; }
-          }
-
-          @keyframes setra-progress {
-            0% { transform: translateX(-100%); opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { transform: translateX(0); opacity: 1; }
-          }
-
-          @keyframes setra-grid-move {
-            0% { background-position: 0 0; }
-            100% { background-position: 80px 80px; }
-          }
-
-          .setra-float {
-            animation: setra-float 6s ease-in-out infinite;
-          }
-
-          .setra-float-delayed {
-            animation: setra-float-delayed 7s ease-in-out infinite;
-          }
-
-          .setra-scan-line {
-            animation: setra-scan 2.8s ease-in-out infinite;
-          }
-
-          .setra-progress {
-            animation: setra-progress 1.2s ease-out both;
-          }
-
-          .setra-grid {
-            background-image:
-              linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
-            background-size: 80px 80px;
-            animation: setra-grid-move 28s linear infinite;
-          }
-
-          @media (prefers-reduced-motion: reduce) {
-            .setra-float,
-            .setra-float-delayed,
-            .setra-scan-line,
-            .setra-progress,
-            .setra-grid {
-              animation: none !important;
-            }
-
-            .setra-tilt-card {
-              transform: none !important;
-            }
-          }
-        `}
-      </style>
-
-      <div
-        className="pointer-events-none fixed z-50 h-96 w-96 rounded-full bg-[#d4af37]/18 blur-3xl transition-opacity duration-500"
-        style={{
-          left: mouse.x - 192,
-          top: mouse.y - 192,
-          opacity: isMounted ? 1 : 0,
-        }}
-      />
-
-      <div className="pointer-events-none absolute inset-0 setra-grid opacity-45" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(212,175,55,0.22),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.10),transparent_26%),linear-gradient(to_bottom,rgba(7,7,10,0.25),#07070a_78%)]" />
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-[#d4af37]/10 blur-[120px]" />
-
-      <section className="relative container mx-auto px-4 pb-20 pt-24 lg:pb-28 lg:pt-32">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.02fr_0.98fr]">
-          <div className="max-w-3xl">
-            <Badge className="rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-1.5 text-xs uppercase tracking-[0.28em] text-[#d4af37] hover:bg-[#d4af37]/10">
-              SETRA DIGITAL LINE
-            </Badge>
-
-            <h1 className="mt-7 font-serif text-5xl leading-[0.92] tracking-tight text-white md:text-6xl lg:text-7xl">
-              SETRA TECH ile işinizi dijitalde güçlendirin
-            </h1>
-
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-white/64 md:text-xl">
-              E-ticaret altyapılarından özel yazılımlara, yapay zeka destekli otomasyonlardan
-              entegrasyon çözümlerine kadar işletmelerin dijital süreçlerini daha hızlı, daha güvenli
-              ve daha verimli hale getiriyoruz.
-            </p>
-
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="rounded-full bg-[#d4af37] px-7 text-black hover:bg-[#e3c65c]">
-                <Link href="#services">
-                  Hizmetleri İncele
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="rounded-full border-white/15 bg-white/[0.04] px-7 text-white hover:bg-white hover:text-black"
-              >
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                  Teklif Al
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
-            </div>
-
-            <div className="mt-12 grid gap-4 sm:grid-cols-3">
-              {[
-                ['Özel yazılım', 'İhtiyaca uygun, sade ve yönetilebilir yapılar'],
-                ['Otomasyon', 'Tekrarlayan işleri hızla dijitalleştiren akışlar'],
-                ['Entegrasyon', 'Sistemler arasında güvenli veri köprüleri'],
-              ].map(([title, text]) => (
-                <SpotlightCard key={title} className="rounded-3xl">
-                  <div className="p-5">
-                    <p className="text-sm font-semibold text-white">{title}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/50">{text}</p>
-                  </div>
-                </SpotlightCard>
-              ))}
-            </div>
-          </div>
-
-          <HeroSystemCard />
-        </div>
-      </section>
-
-      <section id="services" className="relative container mx-auto px-4 py-20 lg:py-28">
-        <SectionHeading
-          eyebrow="Hizmetlerimiz"
-          title="Teknoloji, otomasyon ve dijital dönüşüm için uçtan uca çözümler"
-          description="SETRA TECH, moda ve e-ticaret tarafındaki operasyonel ihtiyaçları anlayan; aynı zamanda yazılım, entegrasyon ve otomasyon ekseninde kurumsal çözümler geliştiren bir teknoloji kolu gibi çalışır."
-        />
-
-        <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {services.map((service) => (
-            <ServiceCard key={service.title} {...service} />
-          ))}
-        </div>
-      </section>
-
-      <section className="relative border-y border-white/10 bg-white/[0.035]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(212,175,55,0.14),transparent_34%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.08),transparent_30%)]" />
-
-        <div className="relative container mx-auto grid gap-10 px-4 py-20 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:py-24">
-          <div>
-            <SectionHeading
-              eyebrow="Neden SETRA TECH?"
-              title="Yalnızca yazılım geliştirmiyor, işletmenizin işleyişini dijitalde güçlendiriyoruz"
-            />
-
-            <SpotlightCard className="mt-7">
-              <div className="p-7">
-                <p className="text-base leading-8 text-white/72">
-                  SETRA TECH olarak yalnızca yazılım geliştirmiyoruz; işletmenin gerçek ihtiyacını
-                  anlayarak satış, operasyon, stok, müşteri ve yönetim süreçlerini dijitalde daha
-                  güçlü hale getiriyoruz.
-                </p>
-              </div>
-            </SpotlightCard>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {reasons.map((reason) => (
-              <SpotlightCard key={reason} className="rounded-3xl">
-                <div className="flex items-start gap-4 p-5">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#d4af37]/12 text-[#d4af37]">
-                    <BadgeCheck className="h-4 w-4" />
-                  </div>
-                  <p className="text-sm leading-6 text-white/75">{reason}</p>
-                </div>
-              </SpotlightCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative container mx-auto px-4 py-20 lg:py-28">
-        <SectionHeading
-          eyebrow="Çalışma Alanlarımız"
-          title="Markanızı birçok dijital kanalda tek çatı altında destekleriz"
-          description="E-ticaret operasyonundan kurumsal yazılıma, lead toplama sistemlerinden bulut altyapılarına kadar kapsamlı bir teknoloji omurgası kuruyoruz."
-          center
-        />
-
-        <div className="mx-auto mt-12 flex max-w-5xl flex-wrap justify-center gap-3">
-          {workAreas.map((area) => (
-            <Badge
-              key={area}
-              variant="outline"
-              className="rounded-full border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-medium text-white/70 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#d4af37]/45 hover:bg-[#d4af37] hover:text-black"
-            >
-              {area}
-            </Badge>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative border-y border-white/10 bg-white/[0.03]">
-        <div className="container mx-auto px-4 py-20 lg:py-24">
-          <SectionHeading
-            eyebrow="Süreç"
-            title="Nasıl Çalışıyoruz?"
-            description="Karmaşık teknolojiyi anlaşılır ve uygulanabilir adımlara dönüştürüyoruz."
-          />
-
-          <div className="relative mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            <div className="pointer-events-none absolute left-0 right-0 top-1/2 hidden h-px bg-gradient-to-r from-transparent via-[#d4af37]/35 to-transparent xl:block" />
-
-            {processSteps.map((step) => {
-              const Icon = step.icon
-
-              return (
-                <SpotlightCard key={step.step} className="relative rounded-3xl">
-                  <div className="p-6">
-                    <div className="mb-6 flex items-center justify-between">
-                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#d4af37]">
-                        {step.step}
-                      </p>
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-[#d4af37]">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                    </div>
-
-                    <h3 className="text-lg font-semibold text-white">{step.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-white/55">{step.description}</p>
-                  </div>
-                </SpotlightCard>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" className="relative container mx-auto px-4 py-20 lg:py-28">
-        <div className="absolute left-1/2 top-1/2 h-[360px] w-[760px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d4af37]/10 blur-[110px]" />
-
-        <Card className="relative overflow-hidden rounded-[2.5rem] border border-[#d4af37]/20 bg-[#101014] text-white shadow-[0_34px_120px_rgba(0,0,0,0.45)]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.25),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_36%)]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
-
-          <CardContent className="relative grid gap-9 p-7 md:p-9 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:p-12">
+    <div className="min-h-screen overflow-x-clip bg-[#080e19] text-white selection:bg-[#b8f5eb]/30">
+      <TechNav />
+      <div id="tech-content">
+        <section className="relative isolate overflow-hidden bg-[radial-gradient(ellipse_at_70%_15%,#17394c_0%,#0c1a2b_39%,#080e19_76%)]">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(#b8f5eb22_1px,transparent_1px),linear-gradient(90deg,#b8f5eb22_1px,transparent_1px)] [background-size:72px_72px]" />
+          <div className="relative mx-auto grid min-h-[690px] max-w-7xl items-center gap-8 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-[1.08fr_.92fr] lg:py-24">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#d4af37]">
-                Teklif
-              </p>
-              <h2 className="mt-4 font-serif text-3xl leading-tight md:text-4xl lg:text-5xl">
-                İşinizi dijitalde daha güçlü hale getirelim.
-              </h2>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-white/68 md:text-lg">
-                SETRA TECH ile e-ticaret, otomasyon, yazılım ve entegrasyon ihtiyaçlarınız için size
-                özel çözümler geliştirebiliriz.
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="rounded-full bg-[#d4af37] px-7 text-black hover:bg-[#e3c65c]">
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                    WhatsApp’tan Teklif Al
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </Button>
-
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full border-white/15 bg-white/[0.04] px-7 text-white hover:bg-white hover:text-black"
-                >
-                  <Link href="#services">Hizmetlere Geri Dön</Link>
-                </Button>
+              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#b8f5eb]">SETRA / Teknoloji Operasyonları</p>
+              <h1 className="mt-7 max-w-3xl font-serif text-[clamp(3.6rem,8vw,7.5rem)] leading-[.92] tracking-tight">İşinizin <span className="text-[#b8f5eb]">yeni</span> çalışma biçimi.</h1>
+              <p className="mt-8 max-w-xl text-lg leading-8 text-white/70 sm:text-xl">Özel yazılım, yapay zekâ ve entegrasyonlarla karmaşık süreçleri anlaşılır, yönetilebilir sistemlere dönüştürüyoruz.</p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link href="#projects" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#b8f5eb] px-6 text-sm font-semibold text-[#08101b] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">Projeleri incele <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+                <Link href="#services" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 px-6 text-sm font-semibold text-white transition hover:border-white/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">Hizmetleri keşfet</Link>
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#e3c675]/40 px-6 text-sm font-semibold text-[#e3c675] transition hover:bg-[#e3c675] hover:text-[#08101b] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">Teklif al <ArrowUpRight aria-hidden="true" className="h-4 w-4" /></a>
               </div>
+              <div className="mt-14 flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-6 text-xs uppercase tracking-[0.2em] text-white/45"><span>Yazılım</span><span>Otomasyon</span><span>Veri</span><span>Yapay zekâ</span></div>
             </div>
+            <TechGraphic />
+          </div>
+        </section>
 
-            <div id="contact-details" className="grid gap-4 sm:grid-cols-2">
-              {[
-                { title: 'Hızlı değerlendirme', text: 'İhtiyaçları birlikte netleştiririz.' },
-                { title: 'Net kapsam', text: 'Gereksiz karmaşa olmadan plan çıkarırız.' },
-                { title: 'Ölçeklenebilir yapı', text: 'Gelecekte genişletmeye uygun kurarız.' },
-                { title: 'Kurumsal destek', text: 'Teslimden sonra da sistemi takip ederiz.' },
-              ].map((item) => (
-                <SpotlightCard key={item.title} className="rounded-3xl">
-                  <div className="p-5">
-                    <p className="text-sm font-semibold text-white">{item.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/55">{item.text}</p>
-                  </div>
-                </SpotlightCard>
-              ))}
+        <Portfolio />
+
+        <section id="services" aria-labelledby="services-title" className="scroll-mt-20 bg-[#edf3f2] py-20 text-[#112333] sm:py-28">
+          <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
+            <div className="lg:sticky lg:top-28 lg:self-start">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#2e7177]">02 / Neler yapıyoruz</p>
+              <h2 id="services-title" className="mt-5 font-serif text-4xl leading-tight sm:text-5xl">Teknoloji, işinize hizmet etsin.</h2>
+              <p className="mt-6 max-w-sm text-base leading-8 text-[#385060]">Tek bir kalıba göre değil, gerçek ihtiyaca göre tasarlanmış çözümler.</p>
+              <Link href="#contact" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#126c72] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#126c72]">İhtiyacınızı anlatın <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
             </div>
-          </CardContent>
-        </Card>
-      </section>
-    </main>
+            <div>
+              {services.map(({ title, description, icon: Icon }, index) => <article key={title} className="grid gap-4 border-b border-[#17394c]/15 py-6 first:pt-0 sm:grid-cols-[3rem_1fr] sm:gap-6">
+                <Icon aria-hidden="true" className="h-7 w-7 text-[#217984]" />
+                <div><p className="text-xs font-medium tracking-[0.2em] text-[#59737b]">{String(index + 1).padStart(2, '0')}</p><h3 className="mt-1 text-xl font-semibold sm:text-2xl">{title}</h3><p className="mt-2 text-sm leading-7 text-[#425965]">{description}</p></div>
+              </article>)}
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="capabilities-title" className="border-y border-white/10 bg-[#0c1726] py-16">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <h2 id="capabilities-title" className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b8f5eb]">Teknoloji yetkinlikleri</h2>
+            <div className="mt-7 flex flex-wrap gap-2.5">{capabilities.map((item) => <span key={item} className="rounded-full border border-white/15 px-4 py-2 text-sm text-white/75">{item}</span>)}</div>
+          </div>
+        </section>
+
+        <section id="process" aria-labelledby="process-title" className="scroll-mt-20 bg-[#080e19] py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b8f5eb]">03 / Çalışma yaklaşımı</p>
+            <h2 id="process-title" className="mt-5 max-w-3xl font-serif text-4xl leading-tight sm:text-5xl">Karmaşığı birlikte sadeleştiriyoruz.</h2>
+            <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-4">{process.map((step) => <article key={step.number} className="border-t border-[#b8f5eb]/40 pt-5"><p className="font-mono text-xs text-[#b8f5eb]">{step.number}</p><h3 className="mt-5 text-xl font-semibold">{step.title}</h3><p className="mt-3 text-sm leading-7 text-white/60">{step.description}</p></article>)}</div>
+          </div>
+        </section>
+
+        <section id="contact" aria-labelledby="contact-title" className="scroll-mt-20 px-5 pb-20 sm:px-8 sm:pb-28">
+          <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-[#b8f5eb]/25 bg-[radial-gradient(circle_at_85%_20%,#246e75_0%,#143345_37%,#102233_80%)] px-6 py-12 sm:px-12 sm:py-16 lg:px-16">
+            <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-32 h-96 w-96 rounded-full border border-[#b8f5eb]/20" />
+            <div className="relative max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b8f5eb]">04 / Birlikte başlayalım</p>
+              <h2 id="contact-title" className="mt-6 font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl">İşiniz için doğru sistemi konuşalım.</h2>
+              <p className="mt-6 max-w-xl text-base leading-8 text-white/70">İhtiyacınızı anlatın; kapsamı, olası yaklaşımı ve sonraki adımı birlikte netleştirelim.</p>
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-full bg-[#b8f5eb] px-6 text-sm font-semibold text-[#07131b] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">WhatsApp’tan teklif alın <ArrowUpRight aria-hidden="true" className="h-4 w-4" /></a>
+            </div>
+          </div>
+        </section>
+      </div>
+      <footer className="border-t border-white/10 bg-[#080e19] px-5 py-7 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 text-xs text-white/45 sm:flex-row"><span>© 2026 SETRA TECH</span><Link href="/" className="w-fit text-[#b8f5eb] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">SETRA mağazasına dön</Link></div></footer>
+    </div>
   )
 }
