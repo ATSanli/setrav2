@@ -27,8 +27,8 @@ export const projects: TechProject[] = [
     name: 'CompOS — Company Operating System',
     category: 'operations',
     area: 'Şirket yönetimi · Otomasyon',
-    problem: 'Şirket yönetimi ve operasyon süreçlerini birlikte ele alma ihtiyacı.',
-    solution: 'Şirket yönetimi ve operasyon süreçleri için geliştirilen otomasyon platformu.',
+    problem: 'Dağınık günlük işlerin takibi, tekrar eden manuel işlemler ve ekipler arası koordinasyon ihtiyacı.',
+    solution: 'CompOS, şirketlerin günlük işlerini ve operasyonel süreçlerini tek platformda bir araya getiren şirket yönetim otomasyonudur. Tekrarlayan görevleri otomatikleştirerek manuel iş yükünü azaltır, süreçleri hızlandırır ve ekiplerin iş gücünü daha verimli kullanmasını sağlar.',
   },
   {
     name: 'Talep Yönetim Sistemi (TYS)', category: 'operations', area: 'Süreç yönetimi',

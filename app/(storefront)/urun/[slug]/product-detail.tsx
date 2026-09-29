@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Heart, Minus, Plus, Star, Truck, RotateCcw, Shield, Instagram } from 'lucide-react'
+import { ChevronRight, Heart, Minus, Plus, Star, Truck, RotateCcw, Shield, Instagram, MessageCircle, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -12,6 +12,7 @@ import { ProductCard } from '@/components/product-card'
 import { useCart } from '@/hooks/use-cart'
 import { cn, formatPrice } from '@/lib/utils'
 import { useT } from '@/components/providers/language-provider'
+import { ORDER_WHATSAPP_NUMBER, TRENDYOL_STORE_URL, orderWhatsAppUrl } from '@/lib/store-links'
 
 interface ProductDetailProps {
   product: {
@@ -81,6 +82,10 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const discount = displayComparePrice
     ? Math.round(((displayComparePrice - displayPrice) / displayComparePrice) * 100)
     : null
+
+  const whatsappMessage = outOfStock
+    ? `Merhaba, SETRA sitesindeki ${product.name} ürününün stok durumunu öğrenmek istiyorum.`
+    : `Merhaba, SETRA sitesindeki ${product.name} ürününü sipariş etmek istiyorum.\nRenk: ${selectedColor || 'Belirtilmedi'}\nBeden: ${selectedSize || 'Belirtilmedi'}\nAdet: ${quantity}`
 
   const handleAddToCart = async () => {
     if (!selectedSize) {
@@ -230,7 +235,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
                 )}
               </div>
               {outOfStock && <p className="mt-3 text-sm text-destructive" role="status">Stokta yok</p>}
-              {product.source === 'TRENDYOL' && <p className="mt-3 text-sm text-muted-foreground" role="status">Trendyol stok bilgisi gösteriliyor. Bu ürün için SETRA üzerinden sipariş henüz açık değil.</p>}
+              {product.source === 'TRENDYOL' && <p className="mt-3 text-sm text-muted-foreground" role="status">Trendyol stok bilgisi gösteriliyor. Bu ürün için siteden sepetle sipariş kapalıdır.</p>}
             </div>
 
             {/* Color selection */}
@@ -340,6 +345,20 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               <Button size="lg" variant="outline" className="h-14 w-14">
                 <Heart className="h-5 w-5" />
               </Button>
+            </div>
+
+            <div className="space-y-3 border border-border bg-secondary/30 p-4">
+              <p className="text-sm font-medium">Site siparişleri için WhatsApp sipariş hattımıza yazmanız gerekmektedir.</p>
+              <p className="text-sm text-muted-foreground">Sipariş hattı: {ORDER_WHATSAPP_NUMBER}</p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <a href={orderWhatsAppUrl(whatsappMessage)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90">
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  {outOfStock ? 'WhatsApp ile stok sor' : 'WhatsApp ile sipariş ver'}
+                </a>
+                <a href={TRENDYOL_STORE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 border border-border px-4 text-sm font-medium transition-colors hover:bg-secondary">
+                  Trendyol mağazamız <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                </a>
+              </div>
             </div>
 
             {/* Features */}

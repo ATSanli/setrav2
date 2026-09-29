@@ -3,13 +3,14 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getServerSession } from 'next-auth'
-import { CheckCircle, Package, ArrowRight } from 'lucide-react'
+import { CheckCircle, Package, ArrowRight, MessageCircle } from 'lucide-react'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { formatPrice } from '@/lib/utils'
 import { translations } from '@/translations'
+import { ORDER_WHATSAPP_NUMBER, orderWhatsAppUrl } from '@/lib/store-links'
 
 interface Props {
   params: Promise<{ orderNumber: string }>
@@ -71,6 +72,16 @@ export default async function OrderConfirmationPage({ params }: Props) {
             <p className="text-sm text-muted-foreground mt-2">
               {translations.tr.order_details_sent}
             </p>
+          </div>
+
+          <div className="mb-8 border border-primary/20 bg-background p-6 text-center">
+            <p className="font-medium">Site siparişinizi tamamlamak için WhatsApp sipariş hattımıza yazmanız gerekmektedir.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Sipariş numaranızı hazır mesajınıza ekledik.</p>
+            <Button asChild className="mt-4">
+              <a href={orderWhatsAppUrl(`Merhaba, SETRA sitesinden ${order.orderNumber} numaralı siparişi oluşturdum. Siparişimi tamamlamak istiyorum.`)} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> WhatsApp sipariş hattı: {ORDER_WHATSAPP_NUMBER}
+              </a>
+            </Button>
           </div>
 
           {/* Order details */}

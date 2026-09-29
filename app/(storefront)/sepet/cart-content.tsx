@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, MessageCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice } from '@/lib/utils'
 import { useT } from '@/components/providers/language-provider'
+import { ORDER_WHATSAPP_NUMBER, orderWhatsAppUrl } from '@/lib/store-links'
 
 const FREE_SHIPPING_THRESHOLD = 500
 
@@ -263,6 +264,13 @@ export function CartContent() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+
+          <div className="mt-4 border border-border bg-background p-4 text-sm">
+            <p className="font-medium">Site siparişleri için WhatsApp sipariş hattımıza yazmanız gerekmektedir.</p>
+            <a href={orderWhatsAppUrl('Merhaba, SETRA sitesindeki sepetim için sipariş vermek istiyorum.')} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 font-medium underline underline-offset-4">
+              <MessageCircle className="h-4 w-4" aria-hidden="true" /> {ORDER_WHATSAPP_NUMBER} · WhatsApp&apos;tan yaz
+            </a>
+          </div>
 
           <p className="text-xs text-muted-foreground text-center mt-4">{t('secure_order')}</p>
 

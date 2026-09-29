@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   ArrowRight, ArrowUpRight, BrainCircuit, Code2, Database, Globe2,
   Menu, Megaphone, ScanEye, Server, Workflow, X,
@@ -67,9 +68,9 @@ function TechNav() {
   )
 }
 
-function TechGraphic({ compact = false }: { compact?: boolean }) {
+function TechGraphic() {
   return (
-    <div aria-hidden="true" className={`relative isolate mx-auto aspect-square w-full ${compact ? 'max-w-[410px]' : 'max-w-[520px]'}`}>
+    <div aria-hidden="true" className="relative isolate mx-auto aspect-square w-full max-w-[520px]">
       <div className="absolute inset-[7%] rounded-full border border-[#b8f5eb]/25 bg-[radial-gradient(circle,#23677140_0%,#17283b40_38%,transparent_72%)] shadow-[0_0_100px_#4dd4be1a]" />
       <div className="absolute inset-[18%] rounded-full border border-dashed border-[#b8f5eb]/25" />
       <div className="absolute inset-[30%] rounded-full border border-[#e3c675]/40" />
@@ -115,7 +116,17 @@ function Portfolio() {
               </div>
               <Link href="#contact" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold text-[#b8f5eb] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b8f5eb]">Benzer bir ihtiyaç için görüşelim <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
             </div>
-            <TechGraphic compact />
+            <div className="relative mx-auto w-full max-w-[520px] self-center lg:ml-auto">
+              <div aria-hidden="true" className="pointer-events-none absolute inset-[10%] rounded-full bg-[#4dd4be]/10 blur-[64px]" />
+              <Image
+                src="/images/setra-tech/compos-connected-automation.webp"
+                width={1200}
+                height={1200}
+                sizes="(max-width: 1023px) min(100vw - 3rem, 520px), 42vw"
+                alt="CompOS otomasyonunu temsil eden merkezî yapay zekâ birimine veri akışlarıyla bağlanan masaüstü bilgisayar, tablet, telefon ve dizüstü bilgisayar"
+                className="relative h-auto w-full mix-blend-lighten"
+              />
+            </div>
           </div>
         </article>
 

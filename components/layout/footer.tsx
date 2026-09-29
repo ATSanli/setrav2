@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Instagram, Facebook, Twitter } from 'lucide-react'
 import { useT } from '@/components/providers/language-provider'
+import { ORDER_WHATSAPP_NUMBER, SUPPORT_WHATSAPP_NUMBER, SUPPORT_WHATSAPP_URL, TRENDYOL_STORE_URL, orderWhatsAppUrl } from '@/lib/store-links'
 
 const footerLinks = {
   shop: [
@@ -59,6 +60,16 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a
+                  href={TRENDYOL_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm"
+                >
+                  Trendyol Mağazamız
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -77,6 +88,16 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a href={orderWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm">
+                  WhatsApp Sipariş: {ORDER_WHATSAPP_NUMBER}
+                </a>
+              </li>
+              <li>
+                <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm">
+                  WhatsApp Destek: {SUPPORT_WHATSAPP_NUMBER}
+                </a>
+              </li>
             </ul>
           </div>
 

@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Plus, Check, CreditCard, Truck } from 'lucide-react'
+import { Plus, Check, CreditCard, Truck, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,6 +24,7 @@ import {
 import { useCart } from '@/hooks/use-cart'
 import { formatPrice, cn } from '@/lib/utils'
 import { useT } from '@/components/providers/language-provider'
+import { ORDER_WHATSAPP_NUMBER, orderWhatsAppUrl } from '@/lib/store-links'
 
 const addressSchema = z.object({
   title: z.string().min(1, 'Adres başlığı gereklidir'),
@@ -377,6 +378,14 @@ export function CheckoutForm({ addresses: initialAddresses }: CheckoutFormProps)
           <div className="flex justify-between font-medium text-lg mb-6">
             <span>{t('total_label')}</span>
             <span>{formatPrice(total)}</span>
+          </div>
+
+          <div className="mb-4 border border-border bg-secondary/30 p-4 text-sm">
+            <p className="font-medium">Site siparişleri için WhatsApp sipariş hattımıza yazmanız gerekmektedir.</p>
+            <p className="mt-1 text-muted-foreground">Sipariş kaydınızı oluşturduktan sonra sipariş numaranızla iletişime geçin.</p>
+            <a href={orderWhatsAppUrl('Merhaba, SETRA sitemizdeki siparişim hakkında yazıyorum.')} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 font-medium underline underline-offset-4">
+              <MessageCircle className="h-4 w-4" aria-hidden="true" /> {ORDER_WHATSAPP_NUMBER} · WhatsApp&apos;tan yaz
+            </a>
           </div>
 
           <Button
