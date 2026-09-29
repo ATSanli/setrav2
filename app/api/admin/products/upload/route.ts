@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { requireAdminOrSuper } from '@/lib/permissions'
+import { adminApiAccess } from '@/lib/admin-api-auth'
 import cloudinary from '@/lib/cloudinary'
 
 export const runtime = 'nodejs'
@@ -32,9 +32,9 @@ async function parseCSV(text: string) {
 }
 
 export async function POST(request: Request) {
+  const { denied } = await adminApiAccess()
+  if (denied) return denied
   try {
-    await requireAdminOrSuper()
-
     const text = await request.text()
     const rows = await parseCSV(text)
 
@@ -83,9 +83,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, created })
-  } catch (err) {
+  } catch {
+    console.error('ADMIN_CSV_UPLOAD_FAILED')
     return NextResponse.json(
-      { error: (err as Error).message || 'Failed' },
+      { error: 'CSV yüklenemedi' },
       { status: 500 }
     )
   }

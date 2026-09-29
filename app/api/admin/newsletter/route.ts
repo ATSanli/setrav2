@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions, isAdmin } from '@/lib/auth'
+import { adminApiAccess } from '@/lib/admin-api-auth'
 import type { Prisma } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
+  const { denied } = await adminApiAccess()
+  if (denied) return denied
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    if (!isAdmin(session.user.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     const url = new URL(request.url)
     const q = url.searchParams.get('q')
     const page = Math.max(1, Math.floor(Number(url.searchParams.get('page')) || 1))
