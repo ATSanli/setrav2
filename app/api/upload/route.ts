@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server'
 import cloudinary from '@/lib/cloudinary'
+import { getServerSession } from 'next-auth'
+import { authOptions, isAdmin } from '@/lib/auth'
 
 export const runtime = 'nodejs'
 
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_BYTES = 5 * 1024 * 1024
+
+async function uploadAccess() {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!isAdmin(session.user.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  return null
+}
 
 async function uploadBufferToCloudinary(buffer: Buffer) {
   return new Promise<any>((resolve, reject) => {
@@ -20,6 +29,8 @@ async function uploadBufferToCloudinary(buffer: Buffer) {
 }
 
 export async function POST(request: Request) {
+  const denied = await uploadAccess()
+  if (denied) return denied
   try {
     const formData = await request.formData()
     const entries = formData.getAll('files')
@@ -66,13 +77,15 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.log("UPLOAD ERROR:", err)
     return NextResponse.json(
-      { error: err.message || 'Upload failed' },
+      { error: 'Upload failed' },
       { status: 500 }
     )
   }
 }
 
 export async function DELETE(request: Request) {
+  const denied = await uploadAccess()
+  if (denied) return denied
   try {
     const body = await request.json().catch(() => ({}))
     const { path, public_id, file } = body as any
@@ -105,6 +118,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true })
   } catch (err: any) {
     console.error('DELETE /api/upload error:', err)
-    return NextResponse.json({ error: err?.message || 'Delete failed' }, { status: 500 })
+    return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
   }
 }

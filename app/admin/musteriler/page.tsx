@@ -1,6 +1,5 @@
 import { Suspense } from 'react'
-import Link from 'next/link'
-import { Search, Eye, Mail } from 'lucide-react'
+import { Search, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,7 +19,7 @@ import { translations } from '@/translations'
 async function getCustomers() {
   try {
     const customers = await prisma.user.findMany({
-      where: { role: 'CUSTOMER' },
+      where: { role: 'USER' },
       include: {
         _count: { select: { orders: true } },
         orders: {
@@ -78,10 +77,10 @@ async function CustomersTable() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                          {customer.name?.charAt(0) || customer.email.charAt(0).toUpperCase()}
+                          {customer.firstName?.charAt(0) || customer.email.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium">{customer.name || 'No name'}</p>
+                          <p className="font-medium">{`${customer.firstName} ${customer.lastName}`.trim() || 'No name'}</p>
                           {customer.phone && (
                             <p className="text-sm text-muted-foreground">{customer.phone}</p>
                           )}
@@ -108,11 +107,6 @@ async function CustomersTable() {
                           <a href={`mailto:${customer.email}`}>
                             <Mail className="h-4 w-4" />
                           </a>
-                        </Button>
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/admin/musteriler/${customer.id}`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
                         </Button>
                       </div>
                     </TableCell>

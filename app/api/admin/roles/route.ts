@@ -18,6 +18,7 @@ const ALLOWED_PERMISSIONS = [
 ]
 
 export async function GET() {
+  try { await requireSuperAdmin() } catch { return NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   const { prisma } = await import('@/lib/prisma')
   // Ensure default roles exist
   const defaultRoles = ['USER', 'ADMIN', 'SUPER_ADMIN']

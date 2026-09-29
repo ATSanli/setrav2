@@ -19,6 +19,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://setraofficial.com'),
   title: {
     default: 'SETRA | Premium Modest Fashion',
     template: '%s | SETRA'

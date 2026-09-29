@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 async function getUserStats(userId: string) {
   const [orderCount, wishlistCount, addressCount, recentOrders] = await Promise.all([
     prisma.order.count({ where: { userId } }),
-    prisma.wishlistItem.count({ where: { userId } }),
+    prisma.favorite.count({ where: { userId, product: { isActive: true } } }),
     prisma.address.count({ where: { userId } }),
     prisma.order.findMany({
       where: { userId },
@@ -74,7 +74,7 @@ export default async function AccountPage() {
         </Link>
 
         <Link
-          href="/hesabim/favorilerim"
+          href="/favoriler"
           className="flex items-center gap-4 p-4 border rounded-sm hover:border-primary transition-colors"
         >
           <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center">

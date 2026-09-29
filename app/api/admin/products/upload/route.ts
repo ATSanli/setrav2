@@ -57,7 +57,7 @@ export async function POST(request: Request) {
           price: r.price,
           sku: `${Date.now()}-${Math.floor(Math.random() * 1000)}`,
           categoryId: category.id,
-          stock: r.stock,
+          variants: { create: { size: 'Standart', color: 'Standart', stock: r.stock, sku: `CSV-${crypto.randomUUID()}` } },
         },
       })
 

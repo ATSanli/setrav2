@@ -94,31 +94,13 @@ export function ProductCard({
     }
   }
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const variantId = (colors && (colors as any)[0] && (colors as any)[0].id) || null
-    if (!variantId) {
-      toast.error(t('select_variant_message'))
-      return
-    }
-    try {
-      const res = await fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: id, variantId, quantity: 1 }) })
-      const js = await res.json()
-      if (!res.ok) throw new Error(js?.error || t('add_failed'))
-      toast.success(t('added_to_cart'))
-    } catch (err: any) {
-      toast.error(err?.message || t('add_failed'))
-    }
-  }
-
   return (
     <article className="group relative">
       <Link href={`/urun/${slug}`} className="block">
         {/* Image container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
           <Image
-            src={imageError ? '/images/placeholder.jpg' : image}
+            src={imageError ? '/placeholder.jpg' : image}
             alt={name}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -171,7 +153,7 @@ export function ProductCard({
             >
               {t('quick_view')}
             </Button>
-            <Button variant="ghost" className="bg-background/95 hover:bg-background" onClick={handleAddToCart}>{t('add_to_cart')}</Button>
+            <span className="bg-background/95 px-3 py-2 text-sm">Beden seç</span>
           </div>
         </div>
 

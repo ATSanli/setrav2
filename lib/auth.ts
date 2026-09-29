@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
-          role: user.role,
+          role: (['USER', 'ADMIN', 'SUPER_ADMIN'].includes(user.role) ? user.role : 'USER') as 'USER' | 'ADMIN' | 'SUPER_ADMIN',
           permissions: resolvedPermissions,
           roleId: user.roleId || null
         }

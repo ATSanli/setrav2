@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       include: {
         items: {
           include: {
-            product: true,
+            product: { include: { category: { select: { isActive: true } } } },
             variant: true
           }
         }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Check stock availability
     for (const item of cart.items) {
       if (item.product.source === 'TRENDYOL') return NextResponse.json({ error: 'Trendyol kaynaklı ürünler için SETRA siparişi kapalı' }, { status: 409 })
-      if (!item.product.isActive || item.variant.productId !== item.productId || item.variant.stock < item.quantity) {
+      if (!item.product.isActive || !item.product.category.isActive || item.variant.productId !== item.productId || item.variant.stock < item.quantity) {
         return NextResponse.json(
           { error: `${item.product.name}${translations.tr.insufficient_stock_suffix}` },
           { status: 400 }

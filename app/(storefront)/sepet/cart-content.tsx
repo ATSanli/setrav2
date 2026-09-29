@@ -17,7 +17,7 @@ const FREE_SHIPPING_THRESHOLD = 500
 
 export function CartContent() {
   const router = useRouter()
-  const { items, subtotal, isLoading, updateQuantity, removeItem, clearCart, mutate, couponCode: serverCouponCode, discount: serverDiscount } = useCart()
+  const { items, subtotal, isLoading, error, updateQuantity, removeItem, clearCart, mutate, couponCode: serverCouponCode, discount: serverDiscount } = useCart()
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
   const t = useT()
 
@@ -82,6 +82,7 @@ export function CartContent() {
   }
 
   const totalAfterDiscount = Math.max(0, total - discountAmount)
+  const hasUnavailableItem = items.some(item => !item.isActive || item.stock < item.quantity)
 
   if (isLoading) {
     return (
@@ -89,6 +90,10 @@ export function CartContent() {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     )
+  }
+
+  if (error) {
+    return <div className="py-16 text-center" role="alert">Sepet şu anda yüklenemiyor. Lütfen sayfayı yenileyerek tekrar deneyin.</div>
   }
 
   if (items.length === 0) {
@@ -133,7 +138,7 @@ export function CartContent() {
             <div key={item.id} className="py-6 first:pt-0 last:pb-0">
               <div className="flex gap-4">
                 {/* Image */}
-                <Link href={`/urun/${item.productId}`} className="flex-shrink-0">
+                {item.isActive ? <Link href={`/urun/${item.slug}`} className="flex-shrink-0">
                   <div className="relative w-24 h-32 bg-secondary overflow-hidden">
                     <Image
                       src={item.image}
@@ -142,18 +147,19 @@ export function CartContent() {
                       className="object-cover"
                     />
                   </div>
-                </Link>
+                </Link> : <div className="relative h-32 w-24 flex-shrink-0 bg-secondary"><Image src={item.image} alt={item.name} fill className="object-cover" /></div>}
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between gap-2">
                     <div>
-                      <Link 
-                        href={`/urun/${item.productId}`}
+                      {item.isActive ? <Link
+                        href={`/urun/${item.slug}`}
                         className="font-medium hover:text-accent transition-colors line-clamp-2"
                       >
                         {item.name}
-                      </Link>
+                      </Link> : <p className="font-medium line-clamp-2">{item.name}</p>}
+                      {!item.isActive && <p className="text-sm text-destructive">Bu ürün artık satışta değil. Lütfen sepetten çıkarın.</p>}
                       <p className="text-sm text-muted-foreground mt-1">
                         {item.color} / {item.size}
                       </p>
@@ -258,12 +264,13 @@ export function CartContent() {
             </div>
           </div>
 
-          <Button className="w-full h-12" size="lg" asChild>
+          {hasUnavailableItem && <p className="mb-3 text-sm text-destructive" role="alert">Stokta olmayan ürünleri sepetten çıkarın veya adetlerini azaltın.</p>}
+          {!hasUnavailableItem && <Button className="w-full h-12" size="lg" asChild>
             <Link href="/odeme">
               {t('checkout')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
-          </Button>
+          </Button>}
 
           <div className="mt-4 border border-border bg-background p-4 text-sm">
             <p className="font-medium">Site siparişleri için WhatsApp sipariş hattımıza yazmanız gerekmektedir.</p>

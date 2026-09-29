@@ -9,7 +9,7 @@ export async function GET() {
     if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const favs = await prisma.favorite.findMany({
-      where: { userId: session.user.id },
+      where: { userId: session.user.id, product: { isActive: true, category: { isActive: true } } },
       include: { product: { include: { images: { take: 1, orderBy: { sortOrder: 'asc' } } } } },
       orderBy: { createdAt: 'desc' }
     })
@@ -17,16 +17,16 @@ export async function GET() {
     const items = favs.map(f => ({
       id: f.id,
       productId: f.productId,
+      slug: f.product.slug,
       name: f.product?.name || 'Ürün',
-      image: f.product?.images?.[0]?.url || '/images/placeholder.jpg',
+      image: f.product?.images?.[0]?.url || '/placeholder.jpg',
       price: Number(f.product?.price || 0)
     }))
 
     return NextResponse.json({ items })
   } catch (error: any) {
     console.error('Favorites GET error:', error)
-    const message = error?.message || String(error) || 'Server error'
-    return NextResponse.json({ error: message, items: [] }, { status: 500 })
+    return NextResponse.json({ error: 'Favoriler şu anda yüklenemiyor' }, { status: 500 })
   }
 }
 
@@ -51,7 +51,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, id: favorite.id })
   } catch (error) {
     console.error('Favorites POST error:', error)
-    const message = (error as any)?.message || String(error) || 'Failed to add favorite'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: 'Favori eklenemedi' }, { status: 500 })
   }
 }

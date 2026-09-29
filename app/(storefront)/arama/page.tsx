@@ -33,6 +33,7 @@ async function searchProducts(query: string, page: number = 1, limit: number = 1
     prisma.product.findMany({
       where: {
         isActive: true,
+        category: { isActive: true },
         OR: [
           { name: { contains: query } },
           { description: { contains: query } },
@@ -59,6 +60,7 @@ async function searchProducts(query: string, page: number = 1, limit: number = 1
     prisma.product.count({
       where: {
         isActive: true,
+        category: { isActive: true },
         OR: [
           { name: { contains: query } },
           { description: { contains: query } },
@@ -131,7 +133,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 slug={product.slug}
                 price={Number(product.price)}
                 comparePrice={product.comparePrice ? Number(product.comparePrice) : null}
-                image={product.images[0]?.url || '/images/placeholder.jpg'}
+                image={product.images[0]?.url || '/placeholder.jpg'}
                 category={product.category.name}
                 isNew={product.isNew}
                 colors={product.variants}

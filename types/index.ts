@@ -117,6 +117,8 @@ export type UserProfile = Prisma.UserGetPayload<{
 
 // Cart item for display
 export interface CartItemDisplay {
+  slug: string
+  isActive: boolean
   id: string
   productId: string
   variantId: string

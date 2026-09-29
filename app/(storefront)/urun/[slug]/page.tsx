@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
@@ -11,7 +11,7 @@ interface Props {
 
 async function getProduct(slug: string) {
   const product = await prisma.product.findFirst({
-    where: { slug, isActive: true },
+    where: { slug, isActive: true, category: { isActive: true } },
     include: {
       category: true,
       images: {
@@ -40,6 +40,7 @@ async function getRelatedProducts(categoryId: string, excludeId: string) {
     where: {
       categoryId,
       isActive: true,
+      category: { isActive: true },
       id: { not: excludeId }
     },
     include: {
@@ -65,12 +66,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct(slug)
   
   if (!product) {
-    return { title: 'Ürün Bulunamadı' }
+    return { title: 'Ürün Bulunamadı', robots: { index: false } }
   }
 
   return {
     title: product.metaTitle || product.name,
     description: product.metaDescription || product.description?.slice(0, 160),
+    alternates: { canonical: `/urun/${product.slug}` },
     openGraph: {
       title: product.name,
       description: product.description || undefined,
@@ -84,6 +86,11 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProduct(slug)
 
   if (!product) {
+    const legacyProduct = await prisma.product.findFirst({
+      where: { OR: [{ id: slug }, { slug: { equals: slug, mode: 'insensitive' } }], isActive: true, category: { isActive: true } },
+      select: { slug: true }
+    })
+    if (legacyProduct) permanentRedirect(`/urun/${legacyProduct.slug}`)
     notFound()
   }
 
@@ -155,7 +162,7 @@ export default async function ProductPage({ params }: Props) {
         slug: p.slug,
         price: Number(p.price),
         comparePrice: p.comparePrice ? Number(p.comparePrice) : null,
-        image: p.images[0]?.url || '/images/placeholder.jpg',
+        image: p.images[0]?.url || '/placeholder.jpg',
         category: p.category.name,
         colors: p.variants,
         isFavorited: p.isFavorited,

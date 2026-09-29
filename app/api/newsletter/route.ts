@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   if (!process.env.DATABASE_URL) {
     console.error('NEWSLETTER ERROR: DATABASE_URL is not set')
     return NextResponse.json(
-      { success: false, error: 'Server configuration error: DATABASE_URL not set' },
+      { success: false, error: 'Bülten şu anda kullanılamıyor' },
       { status: 500 }
     )
   }

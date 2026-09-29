@@ -139,7 +139,7 @@ async function DashboardContent() {
           change="+12.5%"
           changeType="positive"
           icon={TrendingUp}
-          href="/admin/analitik"
+          href="/admin/siparisler"
         />
         <StatCard
           title={translations.tr.total_orders ?? 'Toplam Sipariş'}
@@ -198,15 +198,6 @@ async function DashboardContent() {
                 <div className="text-left">
                   <div className="font-medium">Add Category</div>
                   <div className="text-xs text-muted-foreground">Create new category</div>
-                </div>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-auto py-4 justify-start">
-              <Link href="/admin/urunler/import">
-                <Package className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Import Products</div>
-                  <div className="text-xs text-muted-foreground">CSV bulk import</div>
                 </div>
               </Link>
             </Button>

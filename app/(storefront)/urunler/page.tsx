@@ -11,6 +11,7 @@ import { ProductsFilter } from './products-filter'
 export const metadata: Metadata = {
   title: 'Tüm Ürünler',
   description: 'SETRA koleksiyonundaki tüm ürünleri keşfedin.'
+  ,alternates: { canonical: '/urunler' }
 }
 
 interface Props {
@@ -25,7 +26,7 @@ async function getProducts(
 ) {
   const skip = (page - 1) * limit
 
-  const where: Record<string, unknown> = { isActive: true }
+  const where: Record<string, unknown> = { isActive: true, category: { isActive: true } }
   
   if (categorySlug) {
     const category = await prisma.category.findUnique({
@@ -149,7 +150,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                 slug={product.slug}
                 price={Number(product.price)}
                 comparePrice={product.comparePrice ? Number(product.comparePrice) : null}
-                image={product.images[0]?.url || '/images/placeholder.jpg'}
+                image={product.images[0]?.url || '/placeholder.jpg'}
                 category={product.category.name}
                 isNew={product.isNew}
                 colors={product.variants}

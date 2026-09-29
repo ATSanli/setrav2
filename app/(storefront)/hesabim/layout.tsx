@@ -1,15 +1,14 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
-import { ChevronRight, User, Package, Heart, MapPin, Settings, LogOut } from 'lucide-react'
+import { ChevronRight, User, Package, Heart, MapPin, LogOut } from 'lucide-react'
 import { authOptions } from '@/lib/auth'
 
 const sidebarLinks = [
   { name: 'Hesap Bilgilerim', href: '/hesabim', icon: User },
   { name: 'Siparişlerim', href: '/hesabim/siparislerim', icon: Package },
-  { name: 'Favorilerim', href: '/hesabim/favorilerim', icon: Heart },
+  { name: 'Favorilerim', href: '/favoriler', icon: Heart },
   { name: 'Adreslerim', href: '/hesabim/adreslerim', icon: MapPin },
-  { name: 'Ayarlar', href: '/hesabim/ayarlar', icon: Settings },
 ]
 
 export default async function AccountLayout({

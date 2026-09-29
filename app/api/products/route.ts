@@ -10,16 +10,17 @@ export async function GET(request: NextRequest) {
     const isNew = searchParams.get('new') === 'true'
     const bestseller = searchParams.get('bestseller') === 'true'
     const category = searchParams.get('category')
-    const limit = parseInt(searchParams.get('limit') || '12')
-    const page = parseInt(searchParams.get('page') || '1')
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '12') || 12))
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1)
     const sort = searchParams.get('sort') || 'createdAt'
-    const order = searchParams.get('order') || 'desc'
+    const order = searchParams.get('order') === 'asc' ? 'asc' : 'desc'
     const search = searchParams.get('search')
     const minPrice = searchParams.get('minPrice')
     const maxPrice = searchParams.get('maxPrice')
 
     const where: any = {
-      isActive: true
+      isActive: true,
+      category: { isActive: true }
     }
 
     if (featured) {
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
 
     if (category) {
       where.category = {
+        isActive: true,
         slug: category
       }
     }
@@ -50,11 +52,11 @@ export async function GET(request: NextRequest) {
 
     if (minPrice || maxPrice) {
       where.price = {}
-      if (minPrice) {
-        where.price.gte = parseFloat(minPrice)
+      if (minPrice && Number.isFinite(Number(minPrice))) {
+        where.price.gte = Number(minPrice)
       }
-      if (maxPrice) {
-        where.price.lte = parseFloat(maxPrice)
+      if (maxPrice && Number.isFinite(Number(maxPrice))) {
+        where.price.lte = Number(maxPrice)
       }
     }
 
@@ -71,7 +73,7 @@ export async function GET(request: NextRequest) {
         orderBy = { name: order }
         break
       case 'bestseller':
-        orderBy = { soldCount: 'desc' }
+        orderBy = { isBestSeller: 'desc' }
         break
       default:
         orderBy = { createdAt: order }

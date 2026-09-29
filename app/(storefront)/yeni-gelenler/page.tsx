@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth'
 export const metadata: Metadata = {
   title: 'Yeni Gelenler',
   description: 'SETRA koleksiyonuna yeni eklenen ürünleri keşfedin.'
+  ,alternates: { canonical: '/yeni-gelenler' }
 }
 
 interface Props {
@@ -24,6 +25,7 @@ async function getNewProducts(page: number = 1, limit: number = 12) {
     prisma.product.findMany({
       where: {
         isActive: true,
+        category: { isActive: true },
         isNew: true
       },
       include: {
@@ -44,7 +46,7 @@ async function getNewProducts(page: number = 1, limit: number = 12) {
       take: limit
     }),
     prisma.product.count({
-      where: { isActive: true, isNew: true }
+      where: { isActive: true, isNew: true, category: { isActive: true } }
     })
   ])
 
@@ -84,7 +86,7 @@ export default async function NewArrivalsPage({ searchParams }: Props) {
                 slug={product.slug}
                 price={Number(product.price)}
                 comparePrice={product.comparePrice ? Number(product.comparePrice) : null}
-                image={product.images[0]?.url || '/images/placeholder.jpg'}
+                image={product.images[0]?.url || '/placeholder.jpg'}
                 category={product.category.name}
                 isNew={true}
                 colors={product.variants}

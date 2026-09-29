@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions, isAdmin } from '@/lib/auth'
 
-export async function DELETE(request: NextRequest, { params }: { params: { id?: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    console.log('Admin newsletter DELETE request url=', request.url, 'params=', params)
-
-    // Prefer params.id (app router), but fall back to parsing the URL path
-    let id = params?.id
-    if (!id) {
-      try {
-        const url = new URL(request.url)
-        const parts = url.pathname.split('/').filter(Boolean)
-        id = parts[parts.length - 1]
-      } catch (err) {
-        // ignore URL parse errors
-      }
-    }
+    const session = await getServerSession(authOptions)
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isAdmin(session.user.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const { id } = await params
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing id parameter in path' }, { status: 400 })
@@ -31,7 +24,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id?: 
         return NextResponse.json({ success: false, error: 'Subscriber not found' }, { status: 404 })
       }
       console.error('Admin newsletter delete prisma error:', e)
-      return NextResponse.json({ success: false, error: 'Delete failed', details: e?.message }, { status: 500 })
+      return NextResponse.json({ success: false, error: 'Delete failed' }, { status: 500 })
     }
   } catch (error) {
     console.error('Admin newsletter delete error:', error)

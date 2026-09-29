@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye, Upload } from 'lucide-react'
+import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -161,12 +161,6 @@ export default function AdminProductsPage() {
           <p className="text-muted-foreground">{translations.tr.manage_product_catalog}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/admin/urunler/import">
-              <Upload className="mr-2 h-4 w-4" />
-              {translations.tr.import_products}
-            </Link>
-          </Button>
           <Button asChild>
             <Link href="/admin/urunler/yeni">
               <Plus className="mr-2 h-4 w-4" />

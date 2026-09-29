@@ -1,17 +1,13 @@
 "use client"
 
 import Link from 'next/link'
-import { Instagram, Facebook, Twitter } from 'lucide-react'
+import { Instagram } from 'lucide-react'
 import { useT } from '@/components/providers/language-provider'
 import { ORDER_WHATSAPP_NUMBER, SUPPORT_WHATSAPP_NUMBER, SUPPORT_WHATSAPP_URL, TRENDYOL_STORE_URL, orderWhatsAppUrl } from '@/lib/store-links'
+import { useCategories } from '@/hooks/use-categories'
 
 const footerLinks = {
-  shop: [
-
-    { name: 'Elbise', href: '/kategori/elbise' },
-    { name: 'Takım', href: '/kategori/takim' },
-    { name: 'Yeni Gelenler', href: '/yeni-gelenler' },
-  ],
+  shop: [{ name: 'Yeni Gelenler', href: '/yeni-gelenler' }],
   help: [
     { name: 'İletişim', href: '/iletisim' },
   ],
@@ -29,6 +25,11 @@ const footerLinks = {
 
 export function Footer() {
   const t = useT()
+  const { data: categoryData } = useCategories()
+  const shopLinks = [
+    ...(categoryData?.categories || []).map(category => ({ name: category.name, href: `/kategori/${category.slug}` })),
+    ...footerLinks.shop
+  ]
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -50,7 +51,7 @@ export function Footer() {
               {t('footer_shop')}
             </h4>
             <ul className="space-y-3">
-              {footerLinks.shop.map((link) => (
+              {shopLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -157,24 +158,6 @@ export function Footer() {
                   <Instagram className="h-5 w-5" />
                   <span className="sr-only">Instagram @setraofficialtr</span>
                   <span className="hidden sm:inline ml-2 text-sm">@setraofficialtr</span>
-                </a>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-                >
-                  <Facebook className="h-5 w-5" />
-                  <span className="sr-only">Facebook</span>
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-                >
-                  <Twitter className="h-5 w-5" />
-                  <span className="sr-only">Twitter</span>
                 </a>
               </div>
             </div>

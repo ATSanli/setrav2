@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
@@ -138,12 +138,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = await getCategory(slug)
 
   if (!category) {
-    return { title: 'Kategori Bulunamadı' }
+    return { title: 'Kategori Bulunamadı', robots: { index: false } }
   }
 
   return {
     title: category.name,
     description: category.description || `${category.name} kategorisindeki tüm ürünlerimizi keşfedin.`
+    ,alternates: { canonical: `/kategori/${category.slug}` }
   }
 }
 
@@ -154,6 +155,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const category = await getCategory(slug)
 
   if (!category) {
+    const legacyCategory = await prisma.category.findFirst({ where: { slug: { equals: slug, mode: 'insensitive' }, isActive: true }, select: { slug: true } })
+    if (legacyCategory) permanentRedirect(`/kategori/${legacyCategory.slug}`)
     notFound()
   }
 
@@ -197,7 +200,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         slug: p.slug,
         price: Number(p.price),
         comparePrice: p.comparePrice ? Number(p.comparePrice) : null,
-        image: p.images[0]?.url || '/images/placeholder.jpg',
+        image: p.images[0]?.url || '/placeholder.jpg',
         category: p.category.name,
         isNew: p.isNew,
         colors: p.variants,

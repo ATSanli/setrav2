@@ -107,7 +107,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
                   <div key={item.id} className="flex gap-4">
                     <div className="relative w-16 h-20 bg-secondary flex-shrink-0 overflow-hidden">
                       <Image
-                        src={item.product.images[0]?.url || '/images/placeholder.jpg'}
+                        src={item.product.images[0]?.url || '/placeholder.jpg'}
                         alt={item.productName}
                         fill
                         className="object-cover"

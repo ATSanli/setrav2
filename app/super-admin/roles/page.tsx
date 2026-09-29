@@ -15,7 +15,6 @@ export default async function Page() {
     <div className="min-h-screen p-6 bg-slate-900 text-slate-100">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-semibold mb-6">Role Permissions</h1>
-        {/* @ts-expect-error Server -> Client */}
         <RoleManager initialRoles={formatted} />
       </div>
     </div>

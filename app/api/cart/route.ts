@@ -19,7 +19,7 @@ async function getOrCreateCart(userId?: string) {
           include: {
             product: {
               include: {
-                images: { take: 1, orderBy: { sortOrder: 'asc' } }
+                images: { take: 1, orderBy: { sortOrder: 'asc' } }, category: { select: { isActive: true } }
               }
             },
             variant: true
@@ -54,7 +54,7 @@ async function getOrCreateCart(userId?: string) {
                 include: {
                   product: {
                     include: {
-                      images: { take: 1, orderBy: { sortOrder: 'asc' } }
+                      images: { take: 1, orderBy: { sortOrder: 'asc' } }, category: { select: { isActive: true } }
                     }
                   },
                   variant: true
@@ -73,7 +73,7 @@ async function getOrCreateCart(userId?: string) {
                 include: {
                   product: {
                     include: {
-                      images: { take: 1, orderBy: { sortOrder: 'asc' } }
+                      images: { take: 1, orderBy: { sortOrder: 'asc' } }, category: { select: { isActive: true } }
                     }
                   },
                   variant: true
@@ -90,7 +90,7 @@ async function getOrCreateCart(userId?: string) {
               include: {
                 product: {
                   include: {
-                    images: { take: 1, orderBy: { sortOrder: 'asc' } }
+                    images: { take: 1, orderBy: { sortOrder: 'asc' } }, category: { select: { isActive: true } }
                   }
                 },
                 variant: true
@@ -121,7 +121,7 @@ async function getOrCreateCart(userId?: string) {
           include: {
             product: {
               include: {
-                images: { take: 1, orderBy: { sortOrder: 'asc' } }
+                images: { take: 1, orderBy: { sortOrder: 'asc' } }, category: { select: { isActive: true } }
               }
             },
             variant: true
@@ -138,7 +138,7 @@ async function getOrCreateCart(userId?: string) {
             include: {
               product: {
                 include: {
-                  images: { take: 1, orderBy: { sortOrder: 'asc' } }
+                  images: { take: 1, orderBy: { sortOrder: 'asc' } }, category: { select: { isActive: true } }
                 }
               },
               variant: true
@@ -160,14 +160,16 @@ export async function GET() {
     const items = cart.items.map(item => ({
       id: item.id,
       productId: item.productId,
+      slug: item.product.slug,
+      isActive: item.product.isActive && item.product.category.isActive,
       variantId: item.variantId,
       name: item.product.name,
-      image: item.product.images[0]?.url || '/images/placeholder.jpg',
+      image: item.product.images[0]?.url || '/placeholder.jpg',
       size: item.variant.size,
       color: item.variant.color,
       price: item.variant.salePriceCents !== null ? item.variant.salePriceCents / 100 : Number(item.product.price),
       quantity: item.quantity,
-      stock: item.product.source === 'TRENDYOL' ? 0 : item.variant.stock
+      stock: !item.product.isActive || !item.product.category.isActive || item.product.source === 'TRENDYOL' ? 0 : item.variant.stock
     }))
 
     const subtotal = items.reduce((sum, item) => sum + Math.round(item.price * 100) * item.quantity, 0) / 100
@@ -178,7 +180,7 @@ export async function GET() {
     return NextResponse.json({ items, subtotal, itemCount, couponCode, discount })
   } catch (error) {
     console.error('Cart GET error:', error)
-    return NextResponse.json({ items: [], subtotal: 0, itemCount: 0 })
+    return NextResponse.json({ error: 'Sepet şu anda yüklenemiyor' }, { status: 500 })
   }
 }
 
@@ -251,7 +253,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!Number.isInteger(quantity) || quantity < 1) return NextResponse.json({ error: 'Geçersiz adet' }, { status: 400 })
-    const variant = await prisma.productVariant.findFirst({ where: { id: variantId, productId, product: { isActive: true } }, include: { product: { select: { source: true } } } })
+    const variant = await prisma.productVariant.findFirst({ where: { id: variantId, productId, product: { isActive: true, category: { isActive: true } } }, include: { product: { select: { source: true } } } })
     if (!variant) return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 })
     if (variant.product.source === 'TRENDYOL') return NextResponse.json({ error: 'Trendyol kaynaklı ürünler için SETRA siparişi kapalı' }, { status: 409 })
 

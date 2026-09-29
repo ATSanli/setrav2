@@ -26,16 +26,11 @@ import { useCart } from '@/hooks/use-cart'
 import { SearchDialog } from '@/components/search-dialog'
 import { cn } from '@/lib/utils'
 import { useT, useLanguage } from '@/components/providers/language-provider'
-
-const categories = [
-  /* { name: 'Ferace', slug: 'ferace' }, */
-  { name: 'Elbise', slug: 'elbise' },
-  { name: 'Takım', slug: 'takim' },
-  { name: 'Şal & Eşarp', slug: 'sal-esarp' },
-   /* { name: 'Aksesuar', slug: 'aksesuar' }, */
-]
+import { useCategories } from '@/hooks/use-categories'
 
 export function Header() {
+  const { data: categoryData } = useCategories()
+  const categories = categoryData?.categories || []
   const { data: session, status } = useSession()
   const isAuthenticated = status === 'authenticated'
 
@@ -110,7 +105,7 @@ export function Header() {
               transition={{ duration: 0.3 }}
               className="bg-primary text-primary-foreground text-center py-2 text-xs uppercase tracking-widest overflow-hidden"
             >
-              <p>{t('shipping')}</p>
+              <p>{t('shipping_banner')}</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -315,7 +310,7 @@ export function Header() {
                       <Link href="/hesabim/siparislerim">{t('orders')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/hesabim/favorilerim">{t('wishlist')}</Link>
+                      <Link href="/favoriler">{t('wishlist')}</Link>
                     </DropdownMenuItem>
                       {(session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN') && (
                       <>

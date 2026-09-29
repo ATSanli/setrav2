@@ -15,7 +15,6 @@ export default async function Page() {
         <h1 className="text-3xl font-serif">{translations.tr.users}</h1>
         <p className="text-muted-foreground">{translations.tr.manage_users ?? 'Manage admin and application users'}</p>
       </div>
-      {/* @ts-expect-error Server -> Client */}
       <UsersManager />
     </div>
   )

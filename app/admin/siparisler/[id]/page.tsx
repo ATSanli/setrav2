@@ -76,7 +76,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             <div className="flex justify-between"><span>Ara Toplam</span><span>{formatPrice(Number(order.subtotal))}</span></div>
             <div className="flex justify-between"><span>İndirim</span><span>-{formatPrice(Number(order.discount || 0))}</span></div>
             {('couponCode' in order) && order['couponCode'] ? (
-              <div className="flex justify-between"><span>Kupon</span><span>{order['couponCode']}</span></div>
+              <div className="flex justify-between"><span>Kupon</span><span>{String(order['couponCode'])}</span></div>
             ) : null}
             <div className="flex justify-between font-semibold"><span>Genel Toplam</span><span>{formatPrice(Number(order.total))}</span></div>
             <div className="mt-4">

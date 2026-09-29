@@ -11,9 +11,6 @@ import {
   Users, 
   FolderTree,
   Settings,
-  BarChart3,
-  ImageIcon,
-  Tags,
   MessageSquare
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -26,10 +23,6 @@ const navigation = [
   { name: translations.tr.categories || 'Kategoriler', href: '/admin/kategoriler', icon: FolderTree },
   { name: translations.tr.orders || 'Siparişler', href: '/admin/siparisler', icon: ShoppingCart },
   { name: translations.tr.customers || 'Müşteriler', href: '/admin/musteriler', icon: Users },
-  { name: translations.tr.reviews || 'Değerlendirmeler', href: '/admin/yorumlar', icon: MessageSquare },
-  { name: translations.tr.analytics || 'Analitik', href: '/admin/analitik', icon: BarChart3 },
-  { name: translations.tr.media || 'Medya', href: '/admin/medya', icon: ImageIcon },
-  { name: translations.tr.settings || 'Ayarlar', href: '/admin/ayarlar', icon: Settings },
   { name: translations.tr.users || 'Kullanıcılar', href: '/admin/users', icon: Users },
 ]
 

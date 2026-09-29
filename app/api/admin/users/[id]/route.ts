@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminOrSuper } from '@/lib/permissions'
 import bcrypt from 'bcryptjs'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await requireAdminOrSuper()
+  const { id } = await params
   const { prisma } = await import('@/lib/prisma')
-  const user = await prisma.user.findUnique({ where: { id: params.id }, select: { id: true, email: true, firstName: true, lastName: true, role: true, roleId: true, createdAt: true } })
+  const user = await prisma.user.findUnique({ where: { id }, select: { id: true, email: true, firstName: true, lastName: true, role: true, roleId: true, createdAt: true } })
   if (!user) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ user })
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdminOrSuper()
+  const { id } = await params
   const { prisma } = await import('@/lib/prisma')
   const body = await req.json()
   const { firstName, lastName, email, password, role } = body as any
@@ -27,18 +29,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       data.roleId = roleEntry.id
     }
   }
-  const user = await prisma.user.update({ where: { id: params.id }, data })
+  const user = await prisma.user.update({ where: { id }, data })
   return NextResponse.json({ user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role } })
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdminOrSuper()
+  const { id } = await params
   // Prevent deleting SUPER_ADMIN by non-super
   const { prisma } = await import('@/lib/prisma')
-  const target = await prisma.user.findUnique({ where: { id: params.id } })
+  const target = await prisma.user.findUnique({ where: { id } })
   if (!target) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (target.role === 'SUPER_ADMIN' && session.user.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  await prisma.user.delete({ where: { id: params.id } })
+  await prisma.user.delete({ where: { id } })
   return NextResponse.json({ ok: true })
 }
 

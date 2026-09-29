@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -57,6 +58,8 @@ interface ProductDetailProps {
 
 export function ProductDetail({ product, relatedProducts }: ProductDetailProps) {
   const router = useRouter()
+  const { status } = useSession()
+  const [favoriteId, setFavoriteId] = useState<string | null>(null)
   const { addItem } = useCart()
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.color || '')
@@ -64,6 +67,32 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
   const [quantity, setQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const t = useT()
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    fetch('/api/favorites').then(response => response.ok ? response.json() : null).then(data => {
+      const favorite = data?.items?.find((item: { productId: string; id: string }) => item.productId === product.id)
+      setFavoriteId(favorite?.id || null)
+    }).catch(() => {})
+  }, [product.id, status])
+
+  const toggleFavorite = async () => {
+    if (status !== 'authenticated') {
+      router.push(`/giris?redirect=${encodeURIComponent(`/urun/${product.slug}`)}`)
+      return
+    }
+    try {
+      const response = favoriteId
+        ? await fetch(`/api/favorites/${favoriteId}`, { method: 'DELETE' })
+        : await fetch('/api/favorites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: product.id }) })
+      if (!response.ok) throw new Error()
+      const data = await response.json()
+      setFavoriteId(favoriteId ? null : data.id)
+      toast.success(favoriteId ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi')
+    } catch {
+      toast.error('Favori işlemi tamamlanamadı')
+    }
+  }
 
   // Get available sizes for selected color
   const availableSizes = product.variants
@@ -144,7 +173,7 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
             <div className="relative aspect-[3/4] bg-secondary overflow-hidden">
               {product.images.length > 0 ? (
                 <Image
-                  src={product.images[selectedImage]?.url || '/images/placeholder.jpg'}
+                  src={product.images[selectedImage]?.url || '/placeholder.jpg'}
                   alt={product.images[selectedImage]?.alt || product.name}
                   fill
                   className="object-cover"
@@ -342,8 +371,8 @@ export function ProductDetail({ product, relatedProducts }: ProductDetailProps) 
               >
                 {product.source === 'TRENDYOL' ? 'Siteden sipariş kapalı' : isAddingToCart ? t('adding') : t('add_to_cart')}
               </Button>
-              <Button size="lg" variant="outline" className="h-14 w-14">
-                <Heart className="h-5 w-5" />
+              <Button size="lg" variant="outline" className="h-14 w-14" onClick={toggleFavorite} aria-label={favoriteId ? 'Favorilerden çıkar' : 'Favorilere ekle'}>
+                <Heart className={cn('h-5 w-5', favoriteId && 'fill-accent text-accent')} />
               </Button>
             </div>
 

@@ -32,11 +32,12 @@ export default function FavoritesPage() {
     try {
       const res = await fetch('/api/favorites')
       if (res.status === 401) return router.push('/giris')
+      if (!res.ok) throw new Error('Favoriler şu anda yüklenemiyor')
       const js = await res.json()
       setItems(js.items || [])
     } catch (err) {
       console.error('fetchFavorites error:', err)
-      toast({ title: t('error'), description: String(err) })
+      toast({ title: t('error'), description: 'Lütfen daha sonra tekrar deneyin.' })
     } finally {
       setLoading(false)
     }
@@ -72,13 +73,13 @@ export default function FavoritesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(item => (
             <div key={item.id} className="border rounded-md p-4 flex items-center gap-4">
-              <Link href={`/urun/${item.productId}`} className="flex items-center gap-4">
+              <Link href={`/urun/${item.slug}`} className="flex items-center gap-4">
                 <div className="w-28 h-28 relative flex-shrink-0">
-                  <Image src={item.image || '/images/placeholder.jpg'} alt={item.name} fill className="object-cover rounded" />
+                  <Image src={item.image || '/placeholder.jpg'} alt={item.name} fill className="object-cover rounded" />
                 </div>
               </Link>
               <div className="flex-1">
-                <Link href={`/urun/${item.productId}`} className="block font-medium mb-1 hover:text-accent">{item.name}</Link>
+                <Link href={`/urun/${item.slug}`} className="block font-medium mb-1 hover:text-accent">{item.name}</Link>
                 <div className="text-sm text-muted-foreground">{new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.price)}</div>
               </div>
               <div>

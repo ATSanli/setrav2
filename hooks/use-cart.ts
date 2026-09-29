@@ -4,7 +4,7 @@ import useSWR from 'swr'
 import { useT } from '@/components/providers/language-provider'
 import { CartItemDisplay } from '@/types'
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+const fetcher = async (url: string) => { const res = await fetch(url); if (!res.ok) throw new Error('Sepet yüklenemedi'); return res.json() }
 
 interface CartData {
   items: CartItemDisplay[]

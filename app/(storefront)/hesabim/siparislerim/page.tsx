@@ -103,7 +103,7 @@ export default async function OrdersPage() {
                         style={{ zIndex: 3 - i }}
                       >
                         <Image
-                          src={item.product.images[0]?.url || '/images/placeholder.jpg'}
+                          src={item.product.images[0]?.url || '/placeholder.jpg'}
                           alt={item.productName}
                           fill
                           className="object-cover"
