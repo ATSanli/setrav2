@@ -577,8 +577,8 @@ Her parça, birinci sınıf kumaşlar ve titiz bir detaycılıkla üretilmiştir
                 } else {
                   setNlError(data.error || t('newsletter.messages.exists'))
                 }
-              } catch (err) {
-                setNlError(t('newsletter.messages.invalid_email'))
+              } catch {
+                setNlError('Bağlantı kurulamadı. Lütfen tekrar deneyin.')
               } finally {
                 setNlLoading(false)
               }

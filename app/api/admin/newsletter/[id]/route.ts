@@ -16,7 +16,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     try {
       // ID is expected to be a string (cuid/uuid). Do not cast to number.
-      await prisma.newsletterSubscriber.delete({ where: { id } })
+      await prisma.newsletterSubscriber.update({
+        where: { id },
+        data: { isActive: false, unsubscribedAt: new Date() }
+      })
       return NextResponse.json({ success: true })
     } catch (e: any) {
       const code = e?.code

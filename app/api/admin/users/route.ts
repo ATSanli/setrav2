@@ -1,12 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminOrSuper } from '@/lib/permissions'
 import bcrypt from 'bcryptjs'
+import { getServerSession } from 'next-auth'
+import { authOptions, isAdmin } from '@/lib/auth'
+import type { Prisma } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
-  await requireAdminOrSuper()
-  const { prisma } = await import('@/lib/prisma')
-  const users = await prisma.user.findMany({ select: { id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true, updatedAt: true } , orderBy: { createdAt: 'desc' } })
-  return NextResponse.json({ users })
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!isAdmin(session.user.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const search = req.nextUrl.searchParams.get('q')?.trim() || ''
+  const page = Math.max(1, Math.floor(Number(req.nextUrl.searchParams.get('page')) || 1))
+  const pageSize = Math.min(100, Math.max(1, Math.floor(Number(req.nextUrl.searchParams.get('pageSize')) || 20)))
+  const where: Prisma.UserWhereInput = {
+    ...(req.nextUrl.searchParams.get('role') === 'USER' ? { role: 'USER' } : {}),
+    ...(search ? { OR: [
+      { email: { contains: search, mode: 'insensitive' } },
+      { firstName: { contains: search, mode: 'insensitive' } },
+      { lastName: { contains: search, mode: 'insensitive' } }
+    ] } : {})
+  }
+  try {
+    const { prisma } = await import('@/lib/prisma')
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        select: { id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true, updatedAt: true },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      }),
+      prisma.user.count({ where })
+    ])
+    return NextResponse.json({ users, total, page, pageSize })
+  } catch (error) {
+    console.error('Admin user list failed:', error)
+    return NextResponse.json({ error: 'Kullanıcı listesi yüklenemedi' }, { status: 503 })
+  }
 }
 
 export async function POST(req: NextRequest) {

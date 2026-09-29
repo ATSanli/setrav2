@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -10,8 +10,8 @@ export async function GET() {
     if (!isAdmin(session.user.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     const subs = await prisma.newsletterSubscriber.findMany({ orderBy: { createdAt: 'desc' } })
 
-    const header = 'id,email,createdAt\n'
-    const rows = subs.map((s) => `${s.id},${s.email},${s.createdAt.toISOString()}`).join('\n')
+    const header = 'id,email,status,createdAt,unsubscribedAt\n'
+    const rows = subs.map((s) => `${s.id},${s.email},${s.isActive ? 'active' : 'inactive'},${s.createdAt.toISOString()},${s.unsubscribedAt?.toISOString() || ''}`).join('\n')
     const csv = header + rows
 
     return new NextResponse(csv, {

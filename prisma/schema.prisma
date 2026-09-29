@@ -317,6 +317,8 @@ model Settings {
 model NewsletterSubscriber {
   id        String   @id @default(cuid())
   email     String   @unique
+  isActive  Boolean  @default(true)
+  unsubscribedAt DateTime?
   createdAt DateTime @default(now())
 
   @@map("newsletter_subscribers")

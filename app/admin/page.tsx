@@ -5,8 +5,7 @@ import {
   ShoppingCart, 
   Users, 
   TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight
+  Mail
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,11 +21,12 @@ async function getStats() {
       totalCustomers,
       recentOrders,
       totalRevenue,
-      pendingOrders
+      pendingOrders,
+      activeSubscribers
     ] = await Promise.all([
       prisma.product.count({ where: { isActive: true } }),
       prisma.order.count(),
-      prisma.user.count({ where: { role: 'CUSTOMER' } }),
+      prisma.user.count({ where: { role: 'USER' } }),
       prisma.order.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
@@ -39,42 +39,33 @@ async function getStats() {
         _sum: { total: true },
         where: { status: { in: ['DELIVERED', 'SHIPPED'] } }
       }),
-      prisma.order.count({ where: { status: 'PENDING' } })
+      prisma.order.count({ where: { status: 'PENDING' } }),
+      prisma.newsletterSubscriber.count({ where: { isActive: true } })
     ])
 
     return {
       totalProducts,
       totalOrders,
       totalCustomers,
+      activeSubscribers,
       recentOrders,
       totalRevenue: totalRevenue._sum.total || 0,
       pendingOrders
     }
   } catch (error) {
     console.error('Error fetching stats:', error)
-    return {
-      totalProducts: 0,
-      totalOrders: 0,
-      totalCustomers: 0,
-      recentOrders: [],
-      totalRevenue: 0,
-      pendingOrders: 0
-    }
+    throw new Error('Admin dashboard verileri yüklenemedi')
   }
 }
 
 function StatCard({ 
   title, 
   value, 
-  change, 
-  changeType,
   icon: Icon,
   href
 }: {
   title: string
   value: string | number
-  change?: string
-  changeType?: 'positive' | 'negative'
   icon: React.ElementType
   href: string
 }) {
@@ -89,18 +80,6 @@ function StatCard({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{value}</div>
-          {change && (
-            <p className={`text-xs flex items-center gap-1 mt-1 ${
-              changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {changeType === 'positive' ? (
-                <ArrowUpRight className="h-3 w-3" />
-              ) : (
-                <ArrowDownRight className="h-3 w-3" />
-              )}
-              {change} from last month
-            </p>
-          )}
         </CardContent>
       </Card>
     </Link>
@@ -132,20 +111,16 @@ async function DashboardContent() {
   return (
     <div className="space-y-8">
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <StatCard
           title={translations.tr.total_revenue ?? 'Toplam Gelir'}
           value={formatPrice(Number(stats.totalRevenue))}
-          change="+12.5%"
-          changeType="positive"
           icon={TrendingUp}
           href="/admin/siparisler"
         />
         <StatCard
           title={translations.tr.total_orders ?? 'Toplam Sipariş'}
           value={stats.totalOrders}
-          change="+8.2%"
-          changeType="positive"
           icon={ShoppingCart}
           href="/admin/siparisler"
         />
@@ -158,11 +133,10 @@ async function DashboardContent() {
         <StatCard
           title={translations.tr.total_customers ?? 'Toplam Müşteri'}
           value={stats.totalCustomers}
-          change="+15.3%"
-          changeType="positive"
           icon={Users}
           href="/admin/musteriler"
         />
+        <StatCard title="Aktif Bülten Aboneleri" value={stats.activeSubscribers} icon={Mail} href="/admin/newsletter" />
       </div>
 
       {/* Quick Actions & Recent Orders */}

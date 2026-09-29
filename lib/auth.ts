@@ -16,8 +16,8 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email ve şifre gereklidir')
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: credentials.email.trim(), mode: 'insensitive' } },
           select: { id: true, email: true, password: true, firstName: true, lastName: true, role: true, permissions: true, roleId: true }
         })
 

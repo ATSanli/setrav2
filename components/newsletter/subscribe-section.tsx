@@ -41,8 +41,8 @@ export default function SubscribeSection({ variant = 'section1' }: { variant?: '
       } else {
         setError(data.error || t('newsletter.messages.exists'))
       }
-    } catch (err) {
-      setError(t('newsletter.messages.invalid_email'))
+    } catch {
+      setError('Bağlantı kurulamadı. Lütfen tekrar deneyin.')
     } finally {
       setLoading(false)
     }
@@ -55,12 +55,13 @@ export default function SubscribeSection({ variant = 'section1' }: { variant?: '
         <p className="text-sm mb-4">{t('newsletter.section2.text')}</p>
         <form onSubmit={onSubmit} className="flex gap-2 w-full max-w-md">
           <input
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('newsletter.section2.placeholder') || t('newsletter.section1.placeholder')}
             className="flex-1 px-4 py-3 border rounded bg-white/5"
           />
-          <button type="submit" className="px-4 py-2 bg-primary-foreground text-primary rounded">
+          <button type="submit" disabled={loading} className="px-4 py-2 bg-primary-foreground text-primary rounded">
             {loading ? '...' : t('newsletter.section2.button')}
           </button>
         </form>
@@ -77,12 +78,13 @@ export default function SubscribeSection({ variant = 'section1' }: { variant?: '
       <p className="text-sm mb-4">{t('newsletter.section1.text')}</p>
       <form onSubmit={onSubmit} className="flex gap-2 w-full max-w-md">
         <input
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('newsletter.section1.placeholder')}
           className="flex-1 px-4 py-3 border rounded bg-white/5"
         />
-        <button type="submit" className="px-6 py-3 bg-primary-foreground text-primary rounded">
+        <button type="submit" disabled={loading} className="px-6 py-3 bg-primary-foreground text-primary rounded">
           {loading ? '...' : t('newsletter.section1.button')}
         </button>
       </form>
